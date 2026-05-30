@@ -2,7 +2,13 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Моя Кухня">
+    <meta name="theme-color" content="#C4773B">
+    <meta name="description" content="Рецепты, теория и планировщик с поддержкой заморозки">
+    <link rel="manifest" href="manifest.json">
     <title>Моя Кухня - Рецепты и планировщик</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -206,6 +212,36 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
             justify-content:center;
         }
 
+
+        /* SMOOTH SCROLLING FOR MOBILE */
+        .sidebar {
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+        .content {
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        @supports (scrollbar-width: thin) {
+            .sidebar {
+                scrollbar-width: thin;
+                scrollbar-color: rgba(196, 119, 59, 0.3) rgba(255, 255, 255, 0.05);
+            }
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(196, 119, 59, 0.3);
+            border-radius: 3px;
+        }
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(196, 119, 59, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -1097,7 +1133,7 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
             
             // Search and portions controls
             if (!state.selected && !state.theorySelected && state.page !== 'planner') {
-                html += `<div class="search"><span>🔍</span><input type="text" placeholder="Поиск..." value="${state.search}" oninput="updateSearch(this.value)"/></div>`;
+                html += `<div class="search"><span>🔍</span><input type="text" placeholder="Поиск..." value="${state.search}" oninput="updateSearch(this.value)" onkeyup="updateSearch(this.value)"/></div>`;
                 html += `<div class="portions-row"><span style="color:var(--muted)">👥</span>
                     <button class="scale-btn" style="width:22px;height:22px;font-size:13px" onclick="updatePortions(${state.portions} - 1)">−</button>
                     <strong>${state.portions}</strong>
