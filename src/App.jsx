@@ -1,8 +1,1 @@
-export default function App() {
-  return (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-      <h1>Moyakuhnya - My Kitchen</h1>
-      <p>Recipe and meal planning app coming soon...</p>
-    </div>
-  )
-}
+cat: /sessions/relaxed-beautiful-heisenberg/mnt/.claude/projects/019ddcfa-46a3-7624-bda2-de512ac8efe7/docs/MoyaKuhnya.jsx: No such file or directory
