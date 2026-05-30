@@ -1,12 +1,588 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Moyakuhnya</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moyakuhnya - Моя Кухня</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    :root {
+      --ink: #1C1208;
+      --cream: #FAF6EF;
+      --warm: #F0E8D8;
+      --border: #E8DDD0;
+      --brown: #8B6347;
+      --accent: #C4773B;
+      --green: #3D6B47;
+      --muted: #9A8878;
+      --white: #fff;
+      --r: 14px;
+      --rs: 8px;
+      --gap: 16px;
+      --pad: 24px;
+      --sidebar: 240px;
+    }
+    body {
+      background: var(--cream);
+      font-family: 'Inter', sans-serif;
+      color: var(--ink);
+      font-size: 14px;
+    }
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: var(--sidebar);
+      background: var(--ink);
+      color: var(--cream);
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+    .main {
+      margin-left: var(--sidebar);
+      flex: 1;
+    }
+    .logo {
+      padding: 24px 20px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .logo h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      line-height: 1.2;
+      color: var(--cream);
+    }
+    .logo h1 span {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .logo p {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 3px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .sec-title {
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 14px 20px 4px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 20px;
+      cursor: pointer;
+      font-size: 13px;
+      color: rgba(255,255,255,.65);
+      border-left: 3px solid transparent;
+      transition: all .15s;
+    }
+    .nav-item:hover {
+      background: rgba(255,255,255,.05);
+      color: var(--cream);
+    }
+    .nav-item.active {
+      background: rgba(196,119,59,.15);
+      color: var(--accent);
+      border-left-color: var(--accent);
+    }
+    .nav-item .ni {
+      font-size: 15px;
+      width: 18px;
+    }
+    .header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .header-left h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+    }
+    .header-left p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--warm);
+      border-radius: 30px;
+      padding: 7px 14px;
+      min-width: 180px;
+    }
+    .search input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      color: var(--ink);
+      width: 100%;
+    }
+    .content {
+      padding: 24px 28px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: var(--gap);
+    }
+    .card {
+      background: var(--white);
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 32px rgba(28,18,8,.1);
+    }
+    .card-hero {
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      position: relative;
+    }
+    .card-body {
+      padding: 13px;
+    }
+    .card-body h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 14px;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+    .card-body p {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .tags {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .tag {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .t-time {
+      background: #FFF3E0;
+      color: #E65100;
+    }
+    .t-port {
+      background: #E8F5E9;
+      color: #2E7D32;
+    }
+    .t-freeze {
+      background: #E3F2FD;
+      color: #1565C0;
+    }
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 13px;
+      margin-bottom: 18px;
+      transition: color .15s;
+    }
+    .back:hover {
+      color: var(--accent);
+    }
+    .detail-hero {
+      background: var(--ink);
+      color: var(--cream);
+      border-radius: var(--r);
+      padding: 24px;
+      margin-bottom: 18px;
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+    }
+    .detail-hero .emoji {
+      font-size: 52px;
+      flex-shrink: 0;
+    }
+    .detail-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      margin-bottom: 5px;
+    }
+    .detail-hero p {
+      font-size: 12px;
+      opacity: .6;
+      line-height: 1.6;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .box {
+      background: var(--white);
+      border-radius: var(--r);
+      padding: var(--pad);
+      border: 1px solid var(--border);
+    }
+    .box.full {
+      grid-column: 1 / -1;
+    }
+    .box h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      margin-bottom: 12px;
+      padding-bottom: 9px;
+      border-bottom: 2px solid var(--warm);
+    }
+    .ing-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--warm);
+      font-size: 13px;
+    }
+    .ing-row:last-child {
+      border: none;
+    }
+    .ing-row .amt {
+      color: var(--muted);
+    }
+    .step {
+      display: flex;
+      gap: 11px;
+      margin-bottom: 11px;
+    }
+    .step-n {
+      background: var(--accent);
+      color: #fff;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step p {
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    .btn {
+      padding: 8px 16px;
+      border-radius: 30px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all .15s;
+    }
+    .btn-p {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-p:hover {
+      background: #B36930;
+    }
+    .btn-o {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--ink);
+    }
+    .btn-o:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .empty {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--muted);
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="sidebar">
+      <div class="logo">
+        <h1>Моя <span>Кухня</span></h1>
+        <p>Рецепты и заготовки</p>
+      </div>
+      <div class="sec-title">Основное</div>
+      <div class="nav-item active" data-view="recipes">
+        <span class="ni">📖</span> Рецепты
+      </div>
+      <div class="nav-item" data-view="meal-plan">
+        <span class="ni">📅</span> План недели
+      </div>
+      <div class="nav-item" data-view="groceries">
+        <span class="ni">🛒</span> Покупки
+      </div>
+      <div class="nav-item" data-view="favorites">
+        <span class="ni">❤️</span> Избранное
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="header">
+        <div class="header-left">
+          <h2 id="pageTitle">Рецепты</h2>
+          <p id="pageDesc"></p>
+        </div>
+        <div class="search">
+          <span>🔍</span>
+          <input type="text" id="search" placeholder="Поиск...">
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- Recipes view -->
+        <div id="recipesView" class="view">
+          <div class="grid" id="recipeGrid"></div>
+        </div>
+
+        <!-- Recipe detail -->
+        <div id="detailView" class="view hidden"></div>
+
+        <!-- Other views -->
+        <div id="mealPlanView" class="view hidden">
+          <p class="empty">План недели</p>
+        </div>
+        <div id="groceriesView" class="view hidden">
+          <p class="empty">Покупки</p>
+        </div>
+        <div id="favoritesView" class="view hidden">
+          <p class="empty">Избранное</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State management
+    const state = {
+      currentView: 'recipes',
+      searchTerm: '',
+      favorites: JSON.parse(localStorage.getItem('favorites') || '[]'),
+      selectedRecipe: null
+    };
+
+    // Recipe data
+    const recipes = [
+      {
+        id: 'chicken-marinady',
+        category: 'poultry',
+        title: 'Маринады для курицы (6 вариантов)',
+        emoji: '🍗',
+        time: '10 мин',
+        portions: 4,
+        freeze: 1,
+        desc: 'Шесть маринадов для любого куска курицы — заморозьте сырой',
+        ingredients: [['Курица (любой кусок)', '500–800г']],
+        steps: ['Выберите один маринад, смешайте все его ингредиенты.', 'Обмажьте курицу, уберите в холодильник на 4–24 часа.'],
+        freezeTip: 'Курицу в маринаде замораживайте сырой.'
+      },
+      {
+        id: 'greek-chicken',
+        category: 'poultry',
+        title: 'Греческий боул с курицей',
+        emoji: '🫙',
+        time: '1 час',
+        portions: 5,
+        freeze: 1,
+        desc: 'Куриные бедра в йогуртовом маринаде с кускусом и соусом дзадзики',
+        ingredients: [['Куриные бёдра б/к', '1 кг']],
+        steps: ['Бёдра смешайте с йогуртом...', 'Запекайте 50 мин при 190°C.'],
+        freezeTip: 'Замаринуйте и заморозьте сырыми.'
+      }
+    ];
+
+    // Initialize
+    function init() {
+      setupEventListeners();
+      renderRecipes();
+    }
+
+    function setupEventListeners() {
+      // Navigation
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          const view = e.currentTarget.dataset.view;
+          switchView(view);
+        });
+      });
+
+      // Search
+      document.getElementById('search').addEventListener('input', (e) => {
+        state.searchTerm = e.target.value.toLowerCase();
+        renderRecipes();
+      });
+    }
+
+    function switchView(viewName) {
+      state.currentView = viewName;
+      
+      // Update nav
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.view === viewName) {
+          item.classList.add('active');
+        }
+      });
+
+      // Hide all views
+      document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+
+      // Show selected view
+      switch (viewName) {
+        case 'recipes':
+          document.getElementById('recipesView').classList.remove('hidden');
+          document.getElementById('pageTitle').textContent = 'Рецепты';
+          renderRecipes();
+          break;
+        case 'meal-plan':
+          document.getElementById('mealPlanView').classList.remove('hidden');
+          document.getElementById('pageTitle').textContent = 'План недели';
+          break;
+        case 'groceries':
+          document.getElementById('groceriesView').classList.remove('hidden');
+          document.getElementById('pageTitle').textContent = 'Покупки';
+          break;
+        case 'favorites':
+          document.getElementById('favoritesView').classList.remove('hidden');
+          document.getElementById('pageTitle').textContent = 'Избранное';
+          break;
+      }
+    }
+
+    function renderRecipes() {
+      const filtered = recipes.filter(r => 
+        r.title.toLowerCase().includes(state.searchTerm) ||
+        r.desc.toLowerCase().includes(state.searchTerm)
+      );
+
+      const grid = document.getElementById('recipeGrid');
+      grid.innerHTML = filtered.map(recipe => `
+        <div class="card" onclick="showRecipe('${recipe.id}')">
+          <div class="card-hero">${recipe.emoji}</div>
+          <div class="card-body">
+            <h3>${recipe.title}</h3>
+            <p>${recipe.desc}</p>
+            <div class="tags">
+              <span class="tag t-time">⏱ ${recipe.time}</span>
+              <span class="tag t-port">👥 ${recipe.portions}</span>
+              ${recipe.freeze ? '<span class="tag t-freeze">❄️ Заморозка</span>' : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function showRecipe(id) {
+      const recipe = recipes.find(r => r.id === id);
+      if (!recipe) return;
+
+      state.selectedRecipe = recipe;
+      const view = document.getElementById('detailView');
+      
+      view.innerHTML = `
+        <div class="content">
+          <div class="back" onclick="switchView('recipes')">← Назад</div>
+          <div class="detail-hero">
+            <div class="emoji">${recipe.emoji}</div>
+            <div>
+              <h1>${recipe.title}</h1>
+              <p>${recipe.desc}</p>
+              <div class="tags" style="margin-top: 10px;">
+                <span class="tag t-time">⏱ ${recipe.time}</span>
+                <span class="tag t-port">👥 ${recipe.portions}</span>
+                ${recipe.freeze ? '<span class="tag t-freeze">❄️ Заморозка</span>' : ''}
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-grid">
+            <div class="box">
+              <h4>Ингредиенты</h4>
+              ${recipe.ingredients.map(([name, amt]) => `
+                <div class="ing-row">
+                  <span>${name}</span>
+                  <span class="amt">${amt}</span>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="box">
+              <h4>Пошагово</h4>
+              ${recipe.steps.map((step, i) => `
+                <div class="step">
+                  <div class="step-n">${i + 1}</div>
+                  <p>${step}</p>
+                </div>
+              `).join('')}
+            </div>
+
+            ${recipe.freezeTip ? `
+              <div class="box full" style="background: #E3F2FD; border-color: #90CAF9;">
+                <h4>Как заморозить</h4>
+                <p>${recipe.freezeTip}</p>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+
+      document.getElementById('recipesView').classList.add('hidden');
+      document.getElementById('mealPlanView').classList.add('hidden');
+      document.getElementById('groceriesView').classList.add('hidden');
+      document.getElementById('favoritesView').classList.add('hidden');
+      document.getElementById('detailView').classList.remove('hidden');
+      document.getElementById('pageTitle').textContent = recipe.title;
+    }
+
+    // Start app
+    init();
+  </script>
+</body>
 </html>
