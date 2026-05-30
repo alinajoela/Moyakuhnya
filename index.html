@@ -1,588 +1,1171 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Moyakuhnya - Моя Кухня</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    :root {
-      --ink: #1C1208;
-      --cream: #FAF6EF;
-      --warm: #F0E8D8;
-      --border: #E8DDD0;
-      --brown: #8B6347;
-      --accent: #C4773B;
-      --green: #3D6B47;
-      --muted: #9A8878;
-      --white: #fff;
-      --r: 14px;
-      --rs: 8px;
-      --gap: 16px;
-      --pad: 24px;
-      --sidebar: 240px;
-    }
-    body {
-      background: var(--cream);
-      font-family: 'Inter', sans-serif;
-      color: var(--ink);
-      font-size: 14px;
-    }
-    .app {
-      display: flex;
-      min-height: 100vh;
-    }
-    .sidebar {
-      width: var(--sidebar);
-      background: var(--ink);
-      color: var(--cream);
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      z-index: 100;
-    }
-    .main {
-      margin-left: var(--sidebar);
-      flex: 1;
-    }
-    .logo {
-      padding: 24px 20px 16px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-    .logo h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 20px;
-      line-height: 1.2;
-      color: var(--cream);
-    }
-    .logo h1 span {
-      color: var(--accent);
-      font-style: italic;
-    }
-    .logo p {
-      font-size: 10px;
-      color: var(--muted);
-      margin-top: 3px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-    }
-    .sec-title {
-      font-size: 9px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--muted);
-      padding: 14px 20px 4px;
-    }
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      padding: 9px 20px;
-      cursor: pointer;
-      font-size: 13px;
-      color: rgba(255,255,255,.65);
-      border-left: 3px solid transparent;
-      transition: all .15s;
-    }
-    .nav-item:hover {
-      background: rgba(255,255,255,.05);
-      color: var(--cream);
-    }
-    .nav-item.active {
-      background: rgba(196,119,59,.15);
-      color: var(--accent);
-      border-left-color: var(--accent);
-    }
-    .nav-item .ni {
-      font-size: 15px;
-      width: 18px;
-    }
-    .header {
-      background: var(--white);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .header-left h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-    }
-    .header-left p {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-    .search {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--warm);
-      border-radius: 30px;
-      padding: 7px 14px;
-      min-width: 180px;
-    }
-    .search input {
-      border: none;
-      background: transparent;
-      outline: none;
-      font-size: 13px;
-      font-family: 'Inter', sans-serif;
-      color: var(--ink);
-      width: 100%;
-    }
-    .content {
-      padding: 24px 28px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: var(--gap);
-    }
-    .card {
-      background: var(--white);
-      border-radius: var(--r);
-      border: 1px solid var(--border);
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform .2s, box-shadow .2s;
-    }
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 32px rgba(28,18,8,.1);
-    }
-    .card-hero {
-      height: 100px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 42px;
-      position: relative;
-    }
-    .card-body {
-      padding: 13px;
-    }
-    .card-body h3 {
-      font-family: 'Playfair Display', serif;
-      font-size: 14px;
-      margin-bottom: 4px;
-      line-height: 1.3;
-    }
-    .card-body p {
-      font-size: 11px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-    .tags {
-      display: flex;
-      gap: 4px;
-      margin-top: 8px;
-      flex-wrap: wrap;
-    }
-    .tag {
-      font-size: 10px;
-      padding: 2px 7px;
-      border-radius: 20px;
-      font-weight: 500;
-    }
-    .t-time {
-      background: #FFF3E0;
-      color: #E65100;
-    }
-    .t-port {
-      background: #E8F5E9;
-      color: #2E7D32;
-    }
-    .t-freeze {
-      background: #E3F2FD;
-      color: #1565C0;
-    }
-    .back {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 13px;
-      margin-bottom: 18px;
-      transition: color .15s;
-    }
-    .back:hover {
-      color: var(--accent);
-    }
-    .detail-hero {
-      background: var(--ink);
-      color: var(--cream);
-      border-radius: var(--r);
-      padding: 24px;
-      margin-bottom: 18px;
-      display: flex;
-      gap: 18px;
-      align-items: flex-start;
-    }
-    .detail-hero .emoji {
-      font-size: 52px;
-      flex-shrink: 0;
-    }
-    .detail-hero h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      margin-bottom: 5px;
-    }
-    .detail-hero p {
-      font-size: 12px;
-      opacity: .6;
-      line-height: 1.6;
-    }
-    .detail-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-    .box {
-      background: var(--white);
-      border-radius: var(--r);
-      padding: var(--pad);
-      border: 1px solid var(--border);
-    }
-    .box.full {
-      grid-column: 1 / -1;
-    }
-    .box h4 {
-      font-family: 'Playfair Display', serif;
-      font-size: 15px;
-      margin-bottom: 12px;
-      padding-bottom: 9px;
-      border-bottom: 2px solid var(--warm);
-    }
-    .ing-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px solid var(--warm);
-      font-size: 13px;
-    }
-    .ing-row:last-child {
-      border: none;
-    }
-    .ing-row .amt {
-      color: var(--muted);
-    }
-    .step {
-      display: flex;
-      gap: 11px;
-      margin-bottom: 11px;
-    }
-    .step-n {
-      background: var(--accent);
-      color: #fff;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: 700;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-    .step p {
-      font-size: 13px;
-      line-height: 1.7;
-    }
-    .btn {
-      padding: 8px 16px;
-      border-radius: 30px;
-      border: none;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      transition: all .15s;
-    }
-    .btn-p {
-      background: var(--accent);
-      color: #fff;
-    }
-    .btn-p:hover {
-      background: #B36930;
-    }
-    .btn-o {
-      background: transparent;
-      border: 1.5px solid var(--border);
-      color: var(--ink);
-    }
-    .btn-o:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    .empty {
-      text-align: center;
-      padding: 48px 20px;
-      color: var(--muted);
-    }
-    .hidden {
-      display: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моя Кухня - Рецепты и планировщик</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#1C1208;--cream:#FAF6EF;--warm:#F0E8D8;--border:#E8DDD0;
+  --brown:#8B6347;--accent:#C4773B;--green:#3D6B47;--muted:#9A8878;
+  --white:#fff;--r:14px;--rs:8px;--gap:16px;--pad:24px;--sidebar:240px;
+}
+body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);font-size:14px}
+.app{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--ink);color:var(--cream);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;z-index:100}
+.main{margin-left:var(--sidebar);flex:1}
+.logo{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo h1{font-family:'Playfair Display',serif;font-size:20px;line-height:1.2;color:var(--cream)}
+.logo h1 span{color:var(--accent);font-style:italic}
+.logo p{font-size:10px;color:var(--muted);margin-top:3px;letter-spacing:1.5px;text-transform:uppercase}
+.sec-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:14px 20px 4px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 20px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.65);border-left:3px solid transparent;transition:all .15s}
+.nav-item:hover{background:rgba(255,255,255,.05);color:var(--cream)}
+.nav-item.active{background:rgba(196,119,59,.15);color:var(--accent);border-left-color:var(--accent)}
+.nav-item .ni{font-size:15px;width:18px}
+.header{background:var(--white);border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;gap:12px;flex-wrap:wrap}
+.header-left h2{font-family:'Playfair Display',serif;font-size:22px}
+.header-left p{font-size:12px;color:var(--muted);margin-top:2px}
+.search{display:flex;align-items:center;gap:8px;background:var(--warm);border-radius:30px;padding:7px 14px;min-width:180px}
+.search input{border:none;background:transparent;outline:none;font-size:13px;font-family:'Inter',sans-serif;color:var(--ink);width:100%}
+.content{padding:24px 28px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:var(--gap)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:var(--gap)}
+.card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 32px rgba(28,18,8,.1)}
+.card-hero{height:100px;display:flex;align-items:center;justify-content:center;font-size:42px;position:relative}
+.card-body{padding:13px}
+.card-body h3{font-family:'Playfair Display',serif;font-size:14px;margin-bottom:4px;line-height:1.3}
+.card-body p{font-size:11px;color:var(--muted);line-height:1.5}
+.tags{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.tag{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500}
+.t-time{background:#FFF3E0;color:#E65100}.t-port{background:#E8F5E9;color:#2E7D32}.t-freeze{background:#E3F2FD;color:#1565C0}
+.fav-btn{position:absolute;top:6px;right:6px;background:rgba(255,255,255,.85);border:none;border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
+.back{display:inline-flex;align-items:center;gap:5px;color:var(--muted);cursor:pointer;font-size:13px;margin-bottom:18px;transition:color .15s}
+.back:hover{color:var(--accent)}
+.detail-hero{background:var(--ink);color:var(--cream);border-radius:var(--r);padding:24px;margin-bottom:18px;display:flex;gap:18px;align-items:flex-start}
+.detail-hero .emoji{font-size:52px;flex-shrink:0}
+.detail-hero h1{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:5px}
+.detail-hero p{font-size:12px;opacity:.6;line-height:1.6}
+.meta-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.meta-chip{background:rgba(255,255,255,.1);padding:4px 11px;border-radius:20px;font-size:10px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.box{background:var(--white);border-radius:var(--r);padding:var(--pad);border:1px solid var(--border)}
+.box.full{grid-column:1/-1}
+.box h4{font-family:'Playfair Display',serif;font-size:15px;margin-bottom:12px;padding-bottom:9px;border-bottom:2px solid var(--warm)}
+.ing-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--warm);font-size:13px}
+.ing-row:last-child{border:none}
+.ing-row .amt{color:var(--muted)}
+.step{display:flex;gap:11px;margin-bottom:11px}
+.step-n{background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px}
+.step p{font-size:13px;line-height:1.7}
+.freeze-box{background:#E3F2FD;border-radius:var(--rs);padding:10px 12px;font-size:12px;line-height:1.6;margin-bottom:10px}
+.tip-box{background:#FFF8F0;border-left:4px solid var(--accent);padding:9px 13px;border-radius:0 var(--rs) var(--rs) 0;font-size:12px;line-height:1.6;margin:8px 0}
+.grocery-panel{background:var(--green);color:#fff;border-radius:var(--r);padding:var(--pad);margin-top:14px}
+.grocery-panel h4{font-family:'Playfair Display',serif;font-size:15px;margin-bottom:10px}
+.g-row{display:flex;align-items:center;gap:9px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.15);font-size:13px}
+.g-row:last-child{border:none}
+.g-check{width:16px;height:16px;border:2px solid rgba(255,255,255,.5);border-radius:4px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.g-check.on{background:#fff;border-color:#fff}
+.g-check.on::after{content:'✓';color:var(--green);font-size:10px;font-weight:700}
+.scale-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:13px}
+.scale-btn{background:var(--warm);border:none;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;font-weight:700;transition:background .15s}
+.scale-btn:hover{background:var(--accent);color:#fff}
+.theory-card{background:var(--white);border-radius:var(--r);padding:var(--pad);border:1px solid var(--border);cursor:pointer;transition:transform .2s}
+.theory-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(28,18,8,.08)}
+.theory-card .ti{font-size:30px;margin-bottom:8px}
+.theory-card h3{font-family:'Playfair Display',serif;font-size:15px;margin-bottom:4px}
+.theory-card p{font-size:12px;color:var(--muted)}
+.t-section{background:var(--white);border-radius:var(--r);padding:var(--pad);margin-bottom:12px;border:1px solid var(--border)}
+.t-section h3{font-family:'Playfair Display',serif;font-size:16px;margin-bottom:10px;color:var(--accent)}
+.t-section p,.t-section li{font-size:13px;line-height:1.8}
+.t-section ul{padding-left:15px}
+.t-section li{margin-bottom:3px}
+.tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.tbl th{background:var(--warm);padding:7px 10px;text-align:left;font-weight:600}
+.tbl td{padding:7px 10px;border-bottom:1px solid var(--warm)}
+.plan-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:18px}
+.day-col{background:var(--white);border-radius:var(--r);overflow:hidden;border:1px solid var(--border)}
+.day-head{background:var(--ink);color:var(--cream);padding:7px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.5px}
+.day-slot{padding:8px;min-height:66px;cursor:pointer;transition:background .15s;border-bottom:1px solid var(--border)}
+.day-slot:last-child{border:none}
+.day-slot:hover{background:var(--warm)}
+.slot-lbl{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:3px}
+.slot-val{font-size:10px;line-height:1.4;color:var(--ink)}
+.slot-empty{font-size:16px;opacity:.25}
+.day-slot.takeout{background:#FFF3E0}
+.day-slot.takeout .slot-val{color:var(--accent)}
+.plan-actions{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.btn{padding:8px 16px;border-radius:30px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;transition:all .15s}
+.btn-p{background:var(--accent);color:#fff}.btn-p:hover{background:#B36930}
+.btn-d{background:var(--ink);color:#fff}.btn-d:hover{background:#0d0804}
+.btn-o{background:transparent;border:1.5px solid var(--border);color:var(--ink)}.btn-o:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm{padding:4px 11px;font-size:11px}
+.groc-sum{background:var(--white);border-radius:var(--r);padding:var(--pad);border:1px solid var(--border)}
+.groc-sum h3{font-family:'Playfair Display',serif;font-size:17px;margin-bottom:5px}
+.groc-cat-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:14px 0 7px}
+.groc-item{display:flex;align-items:center;gap:9px;padding:5px 0;border-bottom:1px solid var(--warm);font-size:13px}
+.groc-item:last-child{border:none}
+.gl-check{width:16px;height:16px;border:2px solid var(--border);border-radius:4px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.gl-check.on{background:var(--green);border-color:var(--green)}
+.gl-check.on::after{content:'✓';color:#fff;font-size:10px;font-weight:700}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px}
+.modal{background:var(--white);border-radius:20px;padding:24px;max-width:460px;width:100%;max-height:80vh;overflow-y:auto}
+.modal h3{font-family:'Playfair Display',serif;font-size:17px;margin-bottom:14px}
+.m-item{padding:8px 11px;border-radius:var(--rs);cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;transition:background .15s;margin-bottom:2px}
+.m-item:hover{background:var(--warm)}
+.m-cat-lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:9px 11px 3px}
+.m-footer{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
+.empty{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty .ei{font-size:38px;margin-bottom:11px}
+.empty h3{font-family:'Playfair Display',serif;font-size:17px;color:var(--ink);margin-bottom:5px}
+.badge{background:var(--accent);color:#fff;border-radius:20px;padding:2px 7px;font-size:10px;font-weight:600}
+.loading{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--ink);color:#fff;padding:9px 15px;border-radius:10px;font-size:12px;z-index:300}
+.portions-row{display:flex;align-items:center;gap:8px;background:var(--warm);border-radius:30px;padding:4px 12px;font-size:13px}
+.cat-card{border-radius:var(--r);padding:18px;cursor:pointer;transition:transform .2s;border:1px solid transparent}
+.cat-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(28,18,8,.08)}
+.cat-card .ce{font-size:30px;margin-bottom:7px}
+.cat-card h3{font-family:'Playfair Display',serif;font-size:14px;margin-bottom:2px}
+.cat-card p{font-size:11px;color:var(--muted)}
+@media(max-width:900px){.sidebar{width:200px;min-width:200px}.main{margin-left:200px}.plan-grid{grid-template-columns:repeat(4,1fr)}.detail-grid{grid-template-columns:1fr}}
+
+    </style>
 </head>
 <body>
-  <div class="app">
-    <div class="sidebar">
-      <div class="logo">
-        <h1>Моя <span>Кухня</span></h1>
-        <p>Рецепты и заготовки</p>
-      </div>
-      <div class="sec-title">Основное</div>
-      <div class="nav-item active" data-view="recipes">
-        <span class="ni">📖</span> Рецепты
-      </div>
-      <div class="nav-item" data-view="meal-plan">
-        <span class="ni">📅</span> План недели
-      </div>
-      <div class="nav-item" data-view="groceries">
-        <span class="ni">🛒</span> Покупки
-      </div>
-      <div class="nav-item" data-view="favorites">
-        <span class="ni">❤️</span> Избранное
-      </div>
-    </div>
+    <div id="root"></div>
+    
+    <script>
+        // ═══════════════════════════════════════════════════════════
+        // DATA DEFINITIONS
+        // ═══════════════════════════════════════════════════════════
+        
+        const RD=[
+["chicken-marinady","poultry","Маринады для курицы (6 вариантов)","🍗","10 мин",4,1,"Шесть маринадов для любого куска курицы — заморозьте сырой",
+[["Курица (любой кусок)","500–800г"],["── Азиатский ──",""],["Мёд","4 ст.л."],["Масло раст.","2 ст.л."],["Чеснок","6 зуб."],["Имбирь тёртый","3 ст.л."],["Приправа 5 специй","3 ч.л."],["Соевый соус","5 ст.л."],["Сок лимона","3 ст.л."],["── Медово-горчичный ──",""],["Мёд","2 ст.л."],["Горчица дижонская","1.5 ст.л."],["Соевый соус","3 ст.л."],["Чеснок","5 зуб."],["Масло раст.","2 ст.л."],["Паприка","2 ч.л."],["── Мисо-мёд ──",""],["Мисо паста","2 ст.л."],["Мёд","1.5 ст.л."],["Вода","2 ст.л."],["Уксус рисовый","1 ст.л."],["Масло раст.","1.5 ст.л."],["── Греческий ──",""],["Йогурт греческий","3 ст.л."],["Цедра лимона","1 шт"],["Орегано","1 ч.л."],["Чеснок","2 зуб."],["── Карри-йогурт ──",""],["Йогурт","2 ст.л."],["Карри","1 ч.л."],["Зира","½ ч.л."],["Чеснок","1 зуб."],["── BBQ-паприка ──",""],["Соевый соус","3 ст.л."],["Кетчуп","1 ст.л."],["Копчёная паприка","2 ч.л."],["Мёд","1 ст.л."],["Чили","½ ч.л."]],
+["Выберите один маринад, смешайте все его ингредиенты.","Обмажьте курицу, уберите в холодильник на 4–24 часа.","Или сразу заморозьте в зип-пакете — маринование продолжится при разморозке.","Запекайте при 180–190°C 35–50 мин (целые куски) или жарьте по 4–9 мин с каждой стороны (нарезанная)."],
+"Курицу в маринаде замораживайте сырой. Размораживайте ночь в холодильнике — готова к приготовлению."],
 
-    <div class="main">
-      <div class="header">
-        <div class="header-left">
-          <h2 id="pageTitle">Рецепты</h2>
-          <p id="pageDesc"></p>
-        </div>
-        <div class="search">
-          <span>🔍</span>
-          <input type="text" id="search" placeholder="Поиск...">
-        </div>
-      </div>
+["greek-chicken","poultry","Греческий боул с курицей","🫙","1 час",5,1,"Куриные бедра в йогуртовом маринаде с кускусом и соусом дзадзики",
+[["Куриные бёдра б/к","1 кг"],["Греческий йогурт","2 ст.л."],["Чеснок","2 зуб."],["Орегано","1 ч.л."],["Цедра лимона","⅓ шт"],["Соль","1 ч.л."],["Перец","⅓ ч.л."],["Кускус","150г"],["Кипяток","220г"],["Огурцы, черри, оливки","по вкусу"]],
+["Бёдра смешайте с йогуртом, чесноком, орегано, цедрой, солью, перцем. В форму.","Запекайте 50 мин при 190°C.","Кускус залейте кипятком со щепоткой соли, накройте на 10 мин, разрыхлите вилкой.","Для дзадзики: йогурт + укроп + чеснок + сок лимона + соль.","Сборка: кускус + нарезанная курица + овощи + маринованный лук + соус."],
+"Замаринуйте и заморозьте сырыми. Размораживать ночь в холодильнике, затем запечь."],
 
-      <div class="content">
-        <!-- Recipes view -->
-        <div id="recipesView" class="view">
-          <div class="grid" id="recipeGrid"></div>
-        </div>
+["chicken-mushroom","poultry","Курица с грибами в сливочном соусе","🍄","30 мин",6,1,"Филе бедра с шампиньонами в густом сливочном соусе — идеальная заготовка",
+[["Филе куриного бедра","600г"],["Шампиньоны","400г"],["Лук","1 шт"],["Чеснок","2 зуб."],["Сливки 20%","400г"],["Соль","1 ч.л."],["Перец","½ ч.л."]],
+["Грибы нарежьте, обжарьте на сильном огне до румяности.","Лук обжарьте 5 мин. Добавьте нарезанную курицу, соль, перец.","Через 7 мин добавьте грибы + сливки + чеснок. Выключите когда загустеет.","Остудите, заморозьте порционно."],
+"Из морозилки — прямо на сковородку. Подавайте с пастой, гречкой или рисом."],
 
-        <!-- Recipe detail -->
-        <div id="detailView" class="view hidden"></div>
+["chicken-schnitzel","poultry","Куриный шницель / наггетсы","🍗","30 мин",6,1,"Хрустящие кусочки грудки в панировке — готовить из морозилки за 8 минут",
+[["Куриные грудки","1 кг"],["Яйца","4 шт"],["Мука","200г"],["Сухари панко","300г"],["Соль","2 ч.л."],["Сухой чеснок","1 ч.л."],["Орегано","1 ч.л."],["Масло","50г"]],
+["Грудки нарежьте кусочками 10–15 мм, посолите.","Три чаши: мука+соль, яйца+чеснок, сухари.","Обваляйте каждый: мука → яйцо → сухари.","Заморозьте на доске 2–4 ч, переложите в пакет.","Жарьте по 3–4 мин с каждой стороны на сильном огне."],
+"Замораживайте до жарки. Жарьте прямо из морозилки — так хрустящее."],
 
-        <!-- Other views -->
-        <div id="mealPlanView" class="view hidden">
-          <p class="empty">План недели</p>
-        </div>
-        <div id="groceriesView" class="view hidden">
-          <p class="empty">Покупки</p>
-        </div>
-        <div id="favoritesView" class="view hidden">
-          <p class="empty">Избранное</p>
-        </div>
-      </div>
-    </div>
-  </div>
+["chicken-kotlety","poultry","Куриные котлеты с брокколи","🥦","40 мин",25,1,"Сочные котлеты с брокколи, кукурузой и сыром",
+[["Куриные бёдра б/к","4 шт"],["Куриная грудка","1 шт"],["Брокколи","1 кочан"],["Кукуруза конс.","170г"],["Сыр тёртый","30г"],["Яйца","1–2 шт"],["Крахмал","1 ст.л."],["Соль","1 ч.л."],["Перец","½ ч.л."],["Сухой чеснок","1 ч.л."]],
+["Мясо мелко порубите или прокрутите. Брокколи нарежьте мелко.","Смешайте мясо+брокколи+кукуруза+яйца+сыр+крахмал+специи.","Слепите котлеты, заморозьте на доске.","Запекайте 30 мин при 180°C (или 40 мин из морозилки)."],
+"Замораживайте до жарки. Готовьте без разморозки."],
 
-  <script>
-    // State management
-    const state = {
-      currentView: 'recipes',
-      searchTerm: '',
-      favorites: JSON.parse(localStorage.getItem('favorites') || '[]'),
-      selectedRecipe: null
-    };
+["chicken-basic","poultry","Куриные котлеты классические","🍳","40 мин",20,1,"Домашние котлеты с хлебом, луком и морковью",
+[["Куриные бёдра б/к","1 кг"],["Куриное филе","500г"],["Лук","3 шт"],["Морковь","1 шт"],["Сельдерей","2 стебля"],["Чеснок","2 зуб."],["Белый хлеб","3 слайса"],["Молоко","150г"],["Яйца","2 шт"],["Соль","1.5 ч.л."],["Перец","½ ч.л."]],
+["Хлеб замочите в молоке. Овощи нарежьте, обжарьте, пробейте блендером.","Соедините фарш+хлеб+овощи+яйца+специи. Перемешайте.","Слепите, заморозьте на доске, переложите в пакет.","Жарьте из морозилки по 8 мин с каждой стороны + 2 мин с водой."],
+"Замораживайте до жарки. Готовьте без разморозки."],
 
-    // Recipe data
-    const recipes = [
-      {
-        id: 'chicken-marinady',
-        category: 'poultry',
-        title: 'Маринады для курицы (6 вариантов)',
-        emoji: '🍗',
-        time: '10 мин',
-        portions: 4,
-        freeze: 1,
-        desc: 'Шесть маринадов для любого куска курицы — заморозьте сырой',
-        ingredients: [['Курица (любой кусок)', '500–800г']],
-        steps: ['Выберите один маринад, смешайте все его ингредиенты.', 'Обмажьте курицу, уберите в холодильник на 4–24 часа.'],
-        freezeTip: 'Курицу в маринаде замораживайте сырой.'
-      },
-      {
-        id: 'greek-chicken',
-        category: 'poultry',
-        title: 'Греческий боул с курицей',
-        emoji: '🫙',
-        time: '1 час',
-        portions: 5,
-        freeze: 1,
-        desc: 'Куриные бедра в йогуртовом маринаде с кускусом и соусом дзадзики',
-        ingredients: [['Куриные бёдра б/к', '1 кг']],
-        steps: ['Бёдра смешайте с йогуртом...', 'Запекайте 50 мин при 190°C.'],
-        freezeTip: 'Замаринуйте и заморозьте сырыми.'
-      }
-    ];
+["turkey-roll","poultry","Рулет из индейки / курицы","🦃","1.5 ч",6,1,"Эффектный рулет с вялеными томатами и зеленью в беконе",
+[["Филе грудки индейки","800г"],["Бекон или хамон","180г"],["Сухой чеснок","1 ч.л."],["Соль","½ ч.л."],["Перец","⅓ ч.л."],["Цедра лимона","⅓ шт"],["Сок лимона","2 ст.л."],["Петрушка","1 пучок"],["Вяленые томаты / песто","горсть"]],
+["Филе нарежьте полосками 2 см, добавьте соль, чеснок, перец, сок и цедру.","Зелень+томаты смешайте.","Разложите бекон полосками. Слои: филе→зелень→филе. Сверните.","Заморозьте или обжарьте со всех сторон, запекайте 35–50 мин при 180°C."],
+"Размораживайте ночь. В су-виде: 1.5 ч при 70°C."],
 
-    // Initialize
-    function init() {
-      setupEventListeners();
-      renderRecipes();
-    }
+["fakhitos","poultry","Фахитос из курицы","🌮","30 мин",8,1,"Пряная курица с перцем и томатами в лепёшках",
+[["Куриное мясо отварное","300–400г"],["Болгарский перец","1 шт"],["Лук","1 шт"],["Томаты в с/с","300г"],["Корица","½ ч.л."],["Зира","1 ч.л."],["Чили","½ ч.л."],["Тортильи","8 шт"],["Сыр чеддер","100г"],["Йогурт+кинза","соус"]],
+["Лук и перец обжарьте 10 мин. Добавьте специи+томаты, тушите 5 мин.","Курицу нарежьте мелко, добавьте к соусу.","Выложите на лепёшки, скрутите. Соус: йогурт+кинза+лайм.","Заморозьте или запеките 20 мин при 180°C с сыром."],
+"Скрутите, в зип-пакет, заморозьте. Из морозилки — в духовку 20 мин."],
 
-    function setupEventListeners() {
-      // Navigation
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-          const view = e.currentTarget.dataset.view;
-          switchView(view);
-        });
-      });
+["taco-chicken","poultry","Тако с курицей (заготовка)","🫔","20 мин",10,1,"Куриный фарш на лепёшках — ужин за 2 минуты",
+[["Куриный фарш","500г"],["Чеснок","1 зуб."],["Имбирь","1 ч.л."],["Соль","½ ч.л."],["Перец","½ ч.л."],["Лепёшки тортильи","10 шт"],["Сыр чеддер слайсы","10 шт"]],
+["Фарш обжарьте с чесноком, имбирём, специями.","По 50г фарша на лепёшку. Стопка с плёнкой между ними, в зип-пакет.","Готовить: мясом вниз на горячую сковороду 2 мин. Перевернуть, сыр, крышка 1 мин."],
+"Стопкой с плёнкой — в морозилку. Готовить без разморозки."],
 
-      // Search
-      document.getElementById('search').addEventListener('input', (e) => {
-        state.searchTerm = e.target.value.toLowerCase();
-        renderRecipes();
-      });
-    }
+["chicken-baked","poultry","Запечённая грудка (бережное запекание)","🍖","1.5 ч",4,1,"Сочная грудка при 90°C — основа для супов, боулов и паст",
+[["Куриные грудки","4 шт"],["Солевой раствор 4%","500 мл"],["Масло","немного"]],
+["Грудку окуните в солевой раствор на 1 час.","Обсушите, смажьте маслом.","Запекайте при 90°C не менее 1 ч до 67–70°C внутри.","Для корочки — быстро обжарьте на сильном огне."],
+"В морозилке 3 мес. В вакууме 8 дней. База для множества блюд."],
 
-    function switchView(viewName) {
-      state.currentView = viewName;
-      
-      // Update nav
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-        if (item.dataset.view === viewName) {
-          item.classList.add('active');
+["chicken-riyet","poultry","Риет из курицы","🥣","15 мин",4,1,"Паштет из варёной курицы с творожным сыром и каперсами",
+[["Варёная курица","300г"],["Творожный сыр","150г"],["Красный лук","1 шт"],["Оливки","горсть"],["Каперсы","горсть"],["Дижонская горчица","1 ст.л."],["Перец","⅓ ч.л."],["Куриный бульон","30–70г"]],
+["Все ингредиенты измельчите ножом.","Соедините, мягкость регулируйте бульоном.","Попробуйте, досолите."],
+"4 дня в холодильнике, до 3 мес в морозилке."],
+
+["domashnie-sosiski","poultry","Домашние куриные сосиски","🌭","40 мин",10,1,"Нежные сосиски из куриного фарша без добавок",
+[["Куриные бёдра/грудка","500г"],["Готовые овощи","150г"],["Яйцо","1 шт"],["Сливки 20%","30г"],["Крахмал","1 ст.л."],["Соль","1 ч.л."],["Паприка копчёная","1 ч.л."],["Мускат","½ ч.л."]],
+["Мясо и овощи измельчите в блендере.","Добавьте яйцо, сливки, крахмал, специи.","Выдавите из кондитерского мешка на плёнку, скрутите, разделите нитками.","Варите из морозилки в кипятке 8 мин, затем обжарьте."],
+"До 3 мес в морозилке. Варить без разморозки."],
+
+// BEEF
+["bolognese","beef","Болоньезе","🍝","1.5 ч",8,1,"Классический мясной соус — база для пасты, лазаньи и голубцов",
+[["Фарш говядина+свинина","1 кг"],["Лук","2 шт"],["Морковь","2 шт"],["Сельдерей","3 стебля"],["Чеснок","3 зуб."],["Томатная пассата","800г"],["Белое вино","150г"],["Сахар","1 ст.л."],["Соль","1 ч.л."],["Перец","½ ч.л."]],
+["Лук+морковь+сельдерей мелко, обжарьте 7–10 мин.","Сахар, затем вино — дайте выкипеть.","Добавьте фарш, разбейте на кусочки. Через 7 мин — томаты+специи+чеснок.","Тушите 1 ч под крышкой. Остудите, порции в морозилку."],
+"Порциями 200–300г. Разогревать из морозилки прямо на сковороде."],
+
+["beef-ragu","beef","Рагу из говядины","🥩","4.5 ч",10,1,"Медленно томлённая говядина в томатном соусе — тает во рту",
+[["Говядина лопатка","1.5 кг"],["Морковь","2 шт"],["Лук","3 шт"],["Сельдерей","2 стебля"],["Томатная пассата","2×400г"],["Чеснок","3 зуб."],["Бульон/вода","300г"],["Соль","2 ч.л."],["Сахар","1 ч.л."],["Перец","½ ч.л."]],
+["Овощи обжарьте 10 мин, переложите в форму.","Мясо крупно нарежьте, обжарьте до корочки.","Залейте томатами+бульоном. Запекайте при 140°C 3–4 ч.","Мясо нарежьте, смешайте с соусом. Остудите, заморозьте."],
+"В зип-пакетах. Разогревайте на сковороде, к пасте, гречке или борщу."],
+
+["lazanya","beef","Лазанья","🫕","1.5 ч",8,1,"Классическая лазанья с болоньезе и бешамелем",
+[["Болоньезе готовое","800г"],["Листы лазаньи","12 шт"],["Масло сл.","40г"],["Мука","30г"],["Молоко","500г"],["Соль","½ ч.л."],["Мускат","½ ч.л."],["Сыр тёртый","150г"]],
+["Бешамель: масло+мука, влейте молоко, варите до густоты. Соль+мускат.","Сборка: бешамель→листы→болоньезе→листы→болоньезе→листы→весь бешамель.","Посыпьте сыром, запекайте 40 мин при 180°C.","Остудите, нарежьте порциями, заморозьте."],
+"Порционно. Разогревать в духовке 20 мин при 200°C."],
+
+["lazy-golubtsy","beef","Ленивые голубцы","🥬","40 мин",10,1,"Фарш с рисом и капустой — сытно и просто",
+[["Фарш свинина+говядина","800г"],["Рис","150г"],["Капуста","2 кулака"],["Лук","2 шт"],["Морковь","1 шт"],["Чеснок","2 зуб."],["Томатная паста","2 ст.л."],["Соль","1 ч.л."],["Перец","1 ч.л."]],
+["Рис промойте, залейте 250г кипятка, 15 мин под крышкой.","Обжарьте фарш 7 мин, добавьте лук+морковь.","Добавьте капусту, специи, пасту. Рис + 100г воды, накройте 7 мин.","Остудите, в зип-пакеты."],
+"Для супа или второго. Размораживать не нужно."],
+
+["meatballs","beef","Фрикадельки по-итальянски","🧆","30 мин",50,1,"Фрикадельки с пармезаном — для супов и соусов",
+[["Фарш смешанный","1 кг"],["Петрушка","1 пучок"],["Лук","2 шт"],["Чеснок","2 зуб."],["Яйца","2 шт"],["Пармезан","50г"],["Соль","1 ч.л."],["Перец","½ ч.л."]],
+["Лук+петрушку+чеснок пробейте блендером, добавьте в фарш.","Добавьте яйца+пармезан+специи. Перемешайте.","Скатайте мокрыми руками. Заморозьте на доске, в пакет.","Жарьте из морозилки 15 мин или добавляйте сырыми в суп."],
+"Замораживайте сырыми. Готовьте без разморозки."],
+
+["frikadeli-cream","beef","Фрикадельки в сливочном соусе","🍲","30 мин",8,1,"Скандинавские фрикадельки в бешамеле — к пасте или пюре",
+[["Фарш смешанный","1 кг"],["Лук","2 шт"],["Яйца","2 шт"],["Сухари панко","50г"],["Молоко","150г"],["Соль","1 ч.л."],["Перец","1 ч.л."],["Масло сл.","30г"],["Мука","1 ст.л."],["Молоко для соуса","300г"],["Мускат","⅓ ч.л."]],
+["Замочите сухари в молоке, лук обжарьте. Смешайте всё с фаршем.","Скатайте шарики, обжарьте.","Бешамель: масло+мука+молоко, варите до загустения, мускат.","Влейте соус к фрикаделькам, тушите 5–7 мин."],
+"Замораживайте сырыми. Соус делайте при подаче."],
+
+["beef-stir-fry","beef","Стир-фрай с говядиной","🥢","20 мин",3,0,"Быстрая обжарка с овощами и лапшой в азиатском соусе",
+[["Говядина вырезка","300г"],["Сода","½ ч.л."],["Соевый соус","3 ч.л."],["Имбирь","1 ч.л."],["Крахмал","1 ч.л."],["Капуста пак-чой","200г"],["Лук","1 шт"],["Морковь","1 шт"],["Рисовая лапша","150г"],["Сок лайма","1 шт"],["Мёд","1 ч.л."],["Чеснок","1 зуб."]],
+["Говядину нарежьте тонко поперёк волокон. Соевый+сода+имбирь — 10 мин.","Соус: лайм+мёд+соевый+вода+чеснок. Сварите лапшу.","В говядину — крахмал. На сильный огонь 2–3 мин, выньте.","Овощи 5 мин. Лапша+мясо+соус."]],
+
+["svinye-rebra","beef","Свиные рёбра","🦴","2–4 ч",4,1,"Рёбра в маринаде — томятся в духовке до мягкости",
+[["Свиные рёбра","500–800г"],["Соевый соус","3 ст.л."],["Горчица дижонская","1 ст.л."],["Мёд","1 ст.л."],["Сухой чеснок","1 ч.л."],["Чили","½ ч.л."],["Кетчуп","1 ст.л."]],
+["Обмажьте маринадом, в холодильник на сутки.","В фольгу, запекайте при 140°C 2–4 ч.","Обжарьте на сухой сковороде для корочки."],
+"В фольге — в морозилку. Разогреть в духовке 20 мин при 180°C."],
+
+["roastbeef","beef","Ростбиф с соусом тонато","🥩","1 ч",6,1,"Говяжья вырезка с кремовым соусом из тунца",
+[["Говяжья вырезка","1 кг"],["Тимьян, розмарин","пучок"],["Соль","1 ч.л."],["Перец","1 ч.л."],["Чеснок","2 зуб."],["Соевый соус","1 ст.л."],["Тунец конс.","170г"],["Каперсы","2 ч.л."],["Лимон","½ шт"],["Яйцо варёное","1 шт"],["Горчица","1 ч.л."],["Майонез","2 ст.л."]],
+["Вырезку обмажьте маринадом из трав, чеснока, соли, перца.","Обжарьте на сухой сковороде до корочки.","Запекайте при 140°C до 55°C внутри (~20–25 мин). Бумага, отдых 15 мин.","Соус: тунец+каперсы+лимон+яйцо+горчица+майонез — блендер."],
+"Нарежьте, вакуумируйте, заморозьте. Размораживайте в холодильнике."],
+
+["kor-don-blyu","beef","Кордон блю","🧀","30 мин",4,1,"Отбивная с сыром и ветчиной в хрустящей панировке",
+[["Куриные/свиные отбивные","4 шт"],["Сыр эмменталь","100г"],["Ветчина","100г"],["Яйца","2 шт"],["Мука","100г"],["Сухари панко","150г"],["Соль","1 ч.л."],["Перец","½ ч.л."]],
+["Отбивные отбейте. Положите ломтик сыра и ветчины, сверните рулетом.","Мука → яйцо → сухари.","Жарьте по 4 мин с каждой стороны до золотистой корочки."],
+"Заморозьте в панировке. Жарьте из морозилки по 5 мин с каждой стороны."],
+
+["beef-bulyon","beef","Говяжий бульон","🦴","4 ч",8,1,"Насыщенный бульон из запечённых костей",
+[["Говяжьи кости","1 кг"],["Вода","3 л"],["Лук","3 шт"],["Морковь","1 шт"],["Сельдерей","2 стебля"],["Перец горошком","горсть"],["Лавр","2–3 листа"],["Соль","1.5 ч.л."]],
+["Кости с овощами запеките при 200°C 1 ч.","Залейте водой, добавьте соль+специи, кипятите.","Убавьте до одного пузырька, варите 3–6 ч.","Процедите, остудите, заморозьте."],
+"В зип-пакетах горизонтально. Чем дольше варите — тем насыщеннее."],
+
+// FISH
+["salmon-miso","fish","Лосось в мисо","🐟","20 мин",5,0,"Нежный лосось с пастой мисо — быстро и очень вкусно",
+[["Лосось или форель","800г"],["Паста мисо","1 ст.л."],["Сок лимона/лайма","¼ шт"],["Лапша яичная","250г"],["Кунжутное масло","1 ст.л."],["Соевый соус","1 ст.л."]],
+["Мисо смешайте с лимоном.","Дно сковороды застелите бумагой, рыбу кожей вниз. Сверху — мисо.","⅓ стакана воды под бумагу, накройте, 8–10 мин на среднем огне.","Лапшу сварите, заправьте маслом и соевым."]],
+
+["fish-kotlety-3","fish","Котлеты из трёх видов рыбы","🐠","40 мин",25,1,"Котлеты из белой, красной и копчёной рыбы",
+[["Белая рыба филе","600г"],["Красная рыба филе","400г"],["Копчёная рыба/шпроты","100г"],["Лук","1 шт"],["Масло сл.","20г"],["Яйцо","1 шт"],["Сухари панко","3 ст.л."],["Соль","⅔ ч.л."],["Перец","½ ч.л."]],
+["Лук обжарьте на масле. Лук+рыбу через мясорубку.","Яйцо+соль+перец+сухари. Если жидко — в холодильник 30 мин.","Слепите, заморозьте на доске.","Запекайте 35 мин при 190°C или жарьте по 8–9 мин."],
+"Замораживайте сырыми. Готовьте без разморозки."],
+
+["salmon-kotlety","fish","Котлеты из красной рыбы","🍣","30 мин",20,1,"Котлеты из лосося с цветной капустой — минимум ингредиентов",
+[["Лосось/форель филе","1 кг"],["Цветная капуста","½ кочана"],["Лук","2 шт"],["Соль","1 ч.л."],["Перец","½ ч.л."]],
+["Лук+капусту+рыбу через мясорубку.","Соль+перец, перемешайте. Слепите.","Жарьте по 8 мин с каждой стороны + 2 мин с водой."],
+"Из морозилки по 10 мин с каждой стороны."],
+
+["fish-sauce","fish","Рыба в соусе со шпинатом","🫕","40 мин",4,0,"Белая рыба, запечённая в томатно-сливочном соусе",
+[["Рыбное филе","600–800г"],["Томаты черри","250г"],["Шпинат","100г"],["Сливки 15%","250г"],["Масло сл.","20г"],["Чеснок","2 зуб."],["Лимон","1 шт"],["Соль","1 ч.л."],["Перец","½ ч.л."]],
+["Томаты пополам, чеснок мелко. Обжарьте на масле 3 мин, добавьте шпинат.","Сливки нагрейте, влейте в соус, загустите.","Рыбу в форму, сверху соус + дольки лимона.","Запекайте 30 мин при 180°C."]],
+
+["fish-riyet","fish","Рыбный риет","🥫","20 мин",4,1,"Намаз из варёной рыбы с творожным сыром — к тосту",
+[["Варёная рыба","300г"],["Творожный сыр","150г"],["Горчица дижонская","1 ст.л."],["Укроп","1 пучок"],["Сок лимона","1 ст.л."],["Перец","⅓ ч.л."]],
+["Рыбу отделите от костей, измельчите ножом.","Смешайте с сыром+горчица+укроп+лимон.","Посолите, поперчите."],
+"4 дня в холодильнике, 3 мес в морозилке."],
+
+["finnisch-uha","fish","Финская уха","🥣","30 мин",6,0,"Сливочный суп с лососем, картофелем и укропом",
+[["Красная рыба филе","500г"],["Рыбный бульон","2.5 л"],["Картофель","3 шт"],["Морковь","1 шт"],["Лук","2 шт"],["Масло сл.","20г"],["Мука","1 ст.л."],["Сливки 20%","200–300г"],["Укроп","1 пучок"],["Перец","⅓ ч.л."]],
+["Картофель нарежьте. Лук+морковь обжарьте 5 мин, добавьте муку.","Бульон, довести до кипения, картофель — 15 мин.","Сливки нагрейте, влейте в бульон. Рыба+укроп, выключите через 2 мин."]],
+
+["marinady-ryba","fish","Рыба в маринаде (5 вариантов)","🐡","15 мин",4,1,"Замаринованное рыбное филе для быстрого запекания",
+[["Рыбное филе","1 кг"],["Лайм-чили: лайм+чили+паприка+чеснок+соль","вариант 1"],["Горчица-мёд: горчица+мёд+лимон+чеснок","вариант 2"],["Мисо-лимон: мисо+лимон (сок+цедра)","вариант 3"],["Итальянский: розмарин+чеснок+лимон","вариант 4"],["Апельсин-имбирь: апельсин+имбирь","вариант 5"]],
+["Выберите маринад, смешайте ингредиенты.","Обмажьте рыбу, в холодильник на 2 ч или заморозьте.","Запекайте 180°C 30 мин или жарьте ~10 мин."],
+"Сырую рыбу в маринаде — в зип-пакет, заморозьте. Размораживайте сутки в холодильнике."],
+
+// SOUPS
+["chicken-bulyon","soups","Куриный бульон","🍗","2 ч",14,1,"Базовый бульон из куриного каркаса — основа для супов и круп",
+[["Куриный каркас+крылья","2 шт"],["Лук","3 шт"],["Морковь","1–2 шт"],["Сельдерей","2 стебля"],["Петрушка (стебли)","—"],["Чеснок","1 зуб."],["Лавр","2 листа"],["Перец горошком","горсть"],["Соль","2 ч.л."],["Вода","до краёв"]],
+["Кости и овощи можно запечь 1 ч при 180°C (опционально).","Всё в кастрюлю, залейте водой, доведите до кипения.","Убавьте до одного пузырька, варите 1.5–2 ч.","Процедите, остудите. Мясо — в риет. Бульон — заморозьте."],
+"В зип-пакетах горизонтально. Основа для рамена, рагу, ризотто."],
+
+["fish-bulyon","soups","Рыбный бульон","🐟","1 ч",6,1,"Ароматный бульон из рыбных обрезков",
+[["Остатки рыбы","1 кг"],["Лук","2 шт"],["Сельдерей","2 стебля"],["Вода","2.5 л"],["Соль","1 ч.л."],["Перец горошком","горсть"],["Кориандр","горсть"],["Лавр","2 листа"]],
+["Лук обжарьте срезом вниз до потемнения с сельдереем.","Добавьте рыбные остатки, воду, специи. Варите 50 мин.","Процедите. Остатки рыбы — в риет.","Бульон остудите, заморозьте."],
+"В зип-пакетах. Хранение до 6 мес."],
+
+["ramen","soups","Рамен из куриного бульона","🍜","20 мин",2,0,"Домашний рамен с мисо и яйцом — из заготовок за 20 минут",
+[["Куриный бульон","1 л"],["Паста мисо","1 ст.л."],["Мирин","2 ст.л."],["Сахар","2 ч.л."],["Имбирь свежий","кусочек"],["Яйца","2 шт"],["Лапша рамен","порция"],["Зелёный лук","по вкусу"],["Кунжут","по вкусу"]],
+["Бульон нагрейте, добавьте имбирь+мисо+мирин+сахар, кипятите 5 мин.","Яйца варите ровно 7 мин, залейте холодной водой.","Лапшу варите в бульоне 2–5 мин.","Тарелки: лапша+бульон+яйцо+лук+кунжут."]],
+
+["quicksoup","soups","Быстрый суп из бульона","🍲","15 мин",2,0,"Суп за 15 минут из замороженного бульона — 4 вариации",
+[["Куриный или рыбный бульон","1 л"],["Наполнение на выбор","по вкусу"],["Крупа или лапша","порция"]],
+["Разогрейте замороженный бульон.","Варианты: лапша+курица+яйцо | капуста+картофель | орзо+фрикадельки | чечевица+кейл.","Варите до готовности (лапша 2–5 мин, картофель 10 мин, чечевица 15 мин).","Зелень, кунжутное масло — по вкусу."]],
+
+["borsch","soups","Быстрый борщ из заготовок","🫕","30 мин",6,0,"Борщ из замороженного рагу — 30 минут от начала до конца",
+[["Говяжий бульон","2.5 л"],["Рагу из говядины","300г"],["Свёкла варёная","2 шт"],["Морковь","1 шт"],["Картофель","2–3 шт"],["Капуста","горсть"],["Томатная паста","2 ст.л."],["Чеснок","2 зуб."],["Укроп","пучок"],["Уксус яблочный","2 ст.л."],["Сахар","1 ст.л."]],
+["Нагрейте бульон с рагу. Добавьте картофель+капусту, варите 15 мин.","Натрите свёклу+морковь, обжарьте морковь с пастой. Добавьте в кастрюлю.","Свёкла+уксус+сахар — 10 мин.","Чеснок с укропом измельчите, добавьте в суп."]],
+
+// VEGETARIAN
+["lentil-kotlety","vegetarian","Котлеты из чечевицы","🌿","30 мин",12,1,"Хрустящие котлеты из красной чечевицы с цукини",
+[["Красная чечевица","300г"],["Цукини","½ шт"],["Морковь","1 шт"],["Чеснок","1 зуб."],["Соль","½ ч.л."],["Карри","½ ч.л."],["Перец","½ ч.л."],["Крахмал","1 ст.л."]],
+["Варите чечевицу 3–10 мин до «не каша». Пробейте блендером.","Тёртая морковь+цукини+чеснок+специи+крахмал. Перемешайте.","Слепите, обжарьте до румяной корочки с двух сторон."],
+"Из морозилки по 7–8 мин с каждой стороны."],
+
+["cabbage-miso","vegetarian","Капуста с мисо маслом","🥦","30 мин",4,0,"Жареная капуста с маслом мисо — неожиданно вкусно",
+[["Капуста ½ кочана","1 шт"],["Масло сл.","30г"],["Паста мисо","30г"],["Сок лимона","немного"]],
+["Нарежьте на 8 кусочков с кочерыжкой.","Обжарьте на масле до румяной корочки.","Мягкое масло+мисо — выложите на кусочки.","Запекайте 25 мин при 180°C, полейте лимоном."]],
+
+["veg-bowl","vegetarian","Вег боул с нутом и тыквой","🍲","30 мин",5,0,"Запечённый нут с тыквой и соусом из тхины",
+[["Нут конс.","250г"],["Томаты","4 шт"],["Лук","1 шт"],["Тыква/батат","600г"],["Крупа","250г"],["Шпинат/кейл","200г"],["Зира","1 ч.л."],["Масло","2 ст.л."],["Тхина","3 ст.л."],["Соевый соус","3 ст.л."],["Имбирь","1 ч.л."]],
+["Нут+томаты+лук — в форму со специями. Тыкву — на противень.","Запекайте вместе 30 мин при 190°C.","Крупа+соус (тхина+соевый+имбирь+лимон).","Сборка: тыква+зелень+нут+крупа+соус+орехи."]],
+
+["lentil-curry","vegetarian","Чечевичный карри","🍛","20 мин",4,1,"Ароматный карри из красной чечевицы с кокосовыми сливками",
+[["Красная чечевица","200г"],["Вода/бульон","500г"],["Лук","1 шт"],["Чеснок","3 зуб."],["Имбирь","1 ч.л."],["Куркума","1 ч.л."],["Зира","1 ч.л."],["Чили","1 ч.л."],["Кокосовые сливки","100–200г"],["Масло сл.","20г"],["Соль","1 ч.л."]],
+["Лук обжарьте 5 мин, добавьте специи+имбирь+чеснок.","Чечевица+вода+соль, варите 15–20 мин.","Кокосовые сливки. Для крема — блендер.","Подавайте с кинзой и жареным сыром."],
+"Порционно без сливок. Добавьте при разогреве."],
+
+["panir-curry","vegetarian","Карри с паниром и овощами","🧀","20 мин",5,1,"Сытный карри с жареным сыром и шпинатом — 20 минут",
+[["Панир/адыгейский/халуми","300–400г"],["Чеснок","3 зуб."],["Имбирь","1 ст.л."],["Паста карри","2 ч.л."],["Шпинат зам.","300г"],["Томаты","2 шт"],["Горошек зам.","100г"],["Кокосовые сливки","150–200г"],["Соль","½ ч.л."]],
+["Сыр обжарьте до золотистой корочки.","Добавьте чеснок+имбирь+паста карри+томаты+шпинат+горошек.","Крышка, тушите 10 мин. Добавьте сливки.","С рисом. Остудите, заморозьте."],
+"Порционно. Из морозилки."],
+
+["tofur-bowl","vegetarian","Боул с тофу и лапшой соба","🫘","30 мин",4,0,"Хрустящий тофу с лапшой соба в мисо соусе",
+[["Тофу","400г"],["Соевый соус","3 ст.л."],["Паприка копчёная","1 ч.л."],["Сухой чеснок","1 ч.л."],["Крахмал","2 ч.л."],["Лапша соба","250г"],["Красная капуста","горсть"],["Редис","5 шт"],["Эдамаме","100г"],["Паста мисо (соус)","3 ст.л."],["Уксус","3 ст.л."]],
+["Тофу кубиками+паприка+чеснок+соевый — 30 мин.","Соус: мисо+уксус+вода+чеснок — блендер.","Собу отварите 5 мин, промойте.","В тофу — крахмал, обжарьте до хруста. Соберите боул."]],
+
+["zapechennye-ovoschi","vegetarian","Запечённые овощи с йогуртом","🥕","40 мин",4,0,"Морковь и цветная капуста с карри на йогуртовом соусе",
+[["Морковь","3–4 шт"],["Цветная капуста","½ кочана"],["Пастернак","2 шт"],["Масло","2 ст.л."],["Соль","1 ч.л."],["Карри","1 ч.л."],["Мёд","1 ст.л."],["Греческий йогурт","150г"],["Чеснок","1 зуб."],["Цедра лимона","½ шт"]],
+["Капусту на соцветия, морковь и пастернак брусочками.","Масло+соль+карри+перец. В один слой.","Запекайте 30–40 мин при 180°C.","Йогурт+чеснок+цедра+соль. Выложите на тарелку, сверху овощи+мёд."]],
+
+// SNACKS
+["hummus","snacks","Кремовый хумус","🫘","4 ч",4,1,"Идеально гладкий хумус — секрет в долгой варке и льде",
+[["Нут сырой","200г"],["Соль","2 ч.л."],["Сода","1 ч.л."],["Масло раст.","70г"],["Тхина светлая","80г"],["Сок лимона","1 шт"]],
+["Нут замочите на ночь. С солью и содой варите 3–4 ч.","Измельчите с маслом до крема.","Тхина+лимон+соль. Взбивайте 5 мин, добавьте 3–4 кубика льда.","С оливковым маслом и заатаром."],
+"5 дней в холодильнике, 3 мес в морозилке."],
+
+["sirniy-rulet","snacks","Сырный рулет","🧀","20 мин",8,0,"Творожный сыр с вялеными томатами и сыром с плесенью",
+[["Творожный сыр","300–400г"],["Сыр с плесенью","100г"],["Вяленые томаты","50г"],["Оливки","горсть"],["Каперсы","горсть"],["Песто","30г"],["Орехи","горсть"]],
+["Оливки и томаты нарежьте мелко.","Творожный сыр на плёнке прямоугольником.","Оливки+томаты+сыр с плесенью. Скрутите рулет.","Снаружи — специи+песто+орехи."]],
+
+["farshr-yaytsa","snacks","Фаршированные яйца (3 варианта)","🥚","30 мин",10,0,"Три начинки: бекон-финики, пармезан-острый, мисо-анчоусы",
+[["Яйца","10 шт"],["Майонез","2 ст.л."],["Йогурт","2 ст.л."],["Уксус","2 ст.л."],["Перец","⅓ ч.л."],["Горчица","2 ч.л."],["Бекон","4 полоски"],["Финики","3 шт"],["Пармезан","70г"],["Шрирача","½ ч.л."],["Паста мисо","½ ст.л."]],
+["Яйца варите 10 мин, охладите, очистите. Разрежьте, выньте желтки.","Желтки+йогурт+майонез+уксус+горчица — вилкой. Делите на 3.","1: бекон+финики; 2: пармезан+шрирача; 3: мисо+анчоусы.","Начините, украсьте."]],
+
+["pashtet","snacks","Паштет из куриной печени","🫙","1.5 ч",6,1,"Нежный паштет с луковым мармеладом в баночках",
+[["Куриная печень","400г"],["Масло сл.","30г"],["Масло раст.","1 ст.л."],["Лук","1 шт"],["Морковь","1 шт"],["Розмарин","1 ветка"],["Сахар","2 ст.л."],["Портвейн/вино","100г"],["Сливки 20%","70г"],["Соль","½ ч.л."],["Перец","½ ч.л."]],
+["Лук+морковь с маслом и сахаром до румяного цвета.","Печень+алкоголь+специи, выпарите, тушите 8–10 мин.","Сливки+масло, пробейте блендером.","Разлейте по банкам, водяная баня 1:20."],
+"4 дня в холодильнике, 3 мес в морозилке."],
+
+["dipy","snacks","Дипы для овощей (3 варианта)","🥕","10 мин",4,0,"Рикотта-мёд, фета-свёкла, хумус-йогурт",
+[["Рикотта","250г"],["Мёд","1 ст.л."],["Чеснок","2 зуб."],["Тимьян","⅓ ч.л."],["Свёкла варёная","1 шт"],["Фета","200г"],["Йогурт","100г"],["Хумус","200г"],["Шрирача","2 ч.л."]],
+["Рикотта+мёд+чеснок+соль+тимьян — блендер.","Свёкла+фета+мёд+чеснок — блендер.","Хумус+йогурт+лимон+соль+шрирача.","Подавайте с морковью, редисом, огурцами, перцем."]],
+
+["marinated-eggs","snacks","Маринованные яйца","🥚","15 мин",4,0,"Яйца в мисо-соевом маринаде — для раменов и боулов",
+[["Яйца","4–5 шт"],["Соевый соус","50г"],["Вода","70г"],["Рисовый уксус","30г"],["Чили хлопья","⅓ ч.л."],["Чеснок","1 зуб."],["Имбирь","1 ч.л."]],
+["Варите ровно 7 мин, холодная вода, очистите.","Соевый+вода+уксус+чили+чеснок+имбирь.","Яйца в маринад, холодильник 2 ч–4 дня."]],
+
+["koulslo","snacks","Коул слоу","🥗","10 мин",3,0,"Капустный салат — к мясу, рыбе и бургерам",
+[["Белокочанная капуста","150г"],["Морковь","2 шт"],["Красный лук","½ шт"],["Майонез","1 ст.л."],["Йогурт","1 ст.л."],["Сок лайма","1 шт"],["Мёд","1 ч.л."],["Горчица","1 ч.л."]],
+["Тонко нарежьте капусту, морковь и лук.","Смешайте заправку.","Заправьте, постоять 10 мин."]],
+
+// BREAKFAST
+["syrniki","breakfast","Сырники","🥞","30 мин",40,1,"Классические творожные сырники — пышные и нежные",
+[["Творог в брикете","800г"],["Зерновой творог","500г"],["Сахарная пудра","100–150г"],["Ваниль","по вкусу"],["Мука","150–170г"],["Желтки","2–3 шт"]],
+["Оба вида творога+желтки+ваниль+пудра. Пробейте блендером.","100г муки, замесите. Если липнет — ещё 50–70г.","По 30–50г, шайбочки, обваляйте в муке.","Заморозьте на доске, в пакет.","Из морозилки — жарьте до румяности + духовка 15 мин при 145°C."],
+"Замораживайте до жарки. Готовьте без разморозки."],
+
+["waffles","breakfast","Вафли классические","🧇","20 мин",8,1,"Хрустящие вафли на кефире — заморозьте и разогрейте в тостере",
+[["Кефир","100г"],["Яйца","2 шт"],["Сахар","30г"],["Масло сл.","30г"],["Разрыхлитель","1 ч.л."],["Мука","150г"]],
+["Растопите масло. Кефир+масло+яйца+сахар.","Мука+разрыхлитель, перемешайте.","Выпекайте 4–6 мин на вафельнице.","Остудите на решётке — так хрустящие."],
+"В зип-пакете. Тостер или духовка 7 мин при 160°C."],
+
+["waffles-cheese","breakfast","Сырные вафли","🧇","20 мин",8,1,"Несладкие вафли с творогом и сыром — замена хлебу",
+[["Творог из брикета","200г"],["Яйца","2 шт"],["Сыр полутвёрдый","70г"],["Кефир/вода","70г"],["Мука","100г"],["Разрыхлитель","1 ч.л."],["Соль","⅓ ч.л."]],
+["Сыр натрите. Яйца+творог+кефир+соль.","Мука+разрыхлитель, перемешайте.","Разогрейте вафельницу, выпекайте 4–6 мин.","Остудите на решётке."],
+"В зип-пакете. Тостер разогревает лучше всего."],
+
+["burrito-breakfast","breakfast","Буррито с яйцом","🌯","20 мин",3,1,"Яичный скрэмбл, шпинат, бекон и сыр в лепёшке",
+[["Яйца","4 шт"],["Шпинат","100г"],["Бекон","70г"],["Чеснок","½ зуб."],["Масло сл.","20г"],["Помидор","1 шт"],["Сыр","50г"],["Тортильи","3 шт"],["Соль","½ ч.л."]],
+["Бекон запеките при 200°C 15 мин. Шпинат с чесноком — 3–4 мин.","Яйца взбейте, скрэмбл.","Лепёшка: яйца+шпинат+бекон+томат+сыр. Сверните. Обжарьте с двух сторон."],
+"В плёнку, зип-пакет. Духовка 15 мин при 200°C."],
+
+["apple-oladyi","breakfast","Яблочные оладьи","🍎","15 мин",2,0,"Лёгкие оладьи с тёртым яблоком на кефире",
+[["Яйцо","1 шт"],["Кефир","150г"],["Яблоко","1 шт"],["Мука","100г"],["Разрыхлитель","1 ч.л."],["Корица","½ ч.л."]],
+["Яблоко натрите. Яйцо+кефир+корица.","Мука+разрыхлитель.","Жарьте с двух сторон. Сметана и мёд."]],
+
+["bliny-mushroom","breakfast","Блины с грибами и сыром","🫓","50 мин",8,1,"Тонкие блины с шампиньонами, луком и творожным сыром",
+[["Яйца","2 шт"],["Сахар","20г"],["Соль","½ ч.л."],["Масло сл.","40г"],["Молоко","450г"],["Мука","210г"],["Шампиньоны","600г"],["Лук","1 шт"],["Чеснок","2 зуб."],["Творожный сыр","2 ст.л."],["Сыр твёрдый","50г"]],
+["Тесто: яйца+сахар+соль, тёплое молоко с маслом, мука. Жарьте блины.","Грибы крупно, на сильный огонь 5–7 мин. Лук+чеснок ещё 5–7 мин.","Творожный сыр+твёрдый сыр+зелень.","Заверните начинку в блины."],
+"В зип-пакете. Ночь в холодильнике, утром разогреть."],
+
+["bliny-meat","breakfast","Блины с мясной начинкой","🫓","50 мин",8,1,"Блины с обжаренным фаршем и луком",
+[["Тесто для блинов","—"],["Фарш","500г"],["Лук","2 шт"],["Чеснок","2 зуб."],["Творожный сыр","50г"],["Соль","½ ч.л."],["Перец","½ ч.л."]],
+["Приготовьте тесто и пожарьте блины.","Лук+чеснок до мягкости. Фарш — 7 мин.","Соль+перец+творожный сыр, выпарите жидкость.","Остудите, заверните в блины."],
+"В зип-пакете. Ночь в холодильнике."],
+// SALADS & SIDES
+["marinated-onion","salads","Маринованный лук (2 варианта)","🧅","10 мин",4,0,"Быстрый и длительного хранения — базовый топпинг для любого боула",
+[["Лук","1–4 шт"],["Уксус яблочный или винный до 6%","2 ст.л. / 50г"],["Соль","2 щепотки / 1 ст.л."],["Сахар","2 щепотки / 3 ст.л."],["Вода для рассола","200г"],["Перец горошком для рассола","10 шт"]],
+["Быстрый: лук нарежьте перьями, добавьте соль, сахар, уксус. Оставьте 10–30 мин.","Долгого хранения: вскипятите воду со всеми ингредиентами рассола, залейте лук. Холодильник до 2 месяцев."]],
+
+["marinated-carrot","salads","Маринованная морковь","🥕","10 мин",4,0,"Хрустящая маринованная морковь — к таcos, боулам и бургерам",
+[["Морковь","2 шт"],["Рисовый или яблочный уксус","2 ст.л."],["Соль","½ ч.л."],["Сахар","1 ч.л."]],
+["Морковь нашинкуйте соломкой или натрите на мандолине.","Добавьте уксус, соль, сахар. Оставьте на 30 мин в холодильнике.","Хранить до 3 дней."]],
+
+["morkovny-salat","salads","Морковный салат (2 варианта)","🥕","30 мин",4,0,"Запечённая морковь с йогуртовым соусом или сырая морковь с заправкой",
+[["Морковь","1 кг"],["Мёд","1 ст.л."],["Соль","½ ч.л."],["Перец","⅓ ч.л."],["Масло оливковое","1 ст.л."],["Йогурт греческий","100–150г"],["Чеснок","1 зуб."],["Цедра лимона","½ шт"]],
+["Запечённый вариант: морковь очистите, нарежьте вдоль, смешайте с мёдом, маслом, солью, перцем.","Запекайте в один слой 30 мин при 180–190°C.","Йогуртовый соус: йогурт+чеснок+цедра+соль+немного зелени.","Сырой вариант: нашинкуйте на мандолине, заправьте маслом, уксусом, солью, перцем."]],
+
+["vyalenaya-svekla","salads","Вяленая свёкла","🫚","3 ч",6,1,"Медленно вяленая свёкла — топпинг для боулов или самостоятельный гарнир",
+[["Свёкла варёная","1 кг"],["Масло оливковое","2 ст.л."],["Соль","1 ч.л."],["Сахар","1 ч.л."],["Уксус яблочный","2 ст.л."],["Вода для рассола","1 л"],["Соль для рассола","20г"],["Сахар для рассола","20г"],["Уксус для рассола","90г"]],
+["Свёклу нарежьте дольками, смешайте с маслом, солью, сахаром.","Выложите на противень в один слой, запекайте 3 часа при 90°C.","Для холодильника до 3–4 дней: добавьте уксус, масло, соль, перец.","Для хранения до 2 мес: залейте тёплым рассолом в стерильную банку."],
+"Замораживайте без рассола, порционно."],
+
+["svekla-salat","salads","Салат из свёклы, яблока и изюма","🍎","15 мин",4,0,"Сырая свёкла с яблоком, зеленью и фисташками — лёгкий и яркий",
+[["Свёкла сырая","2–3 шт"],["Яблоко","1 большое"],["Чеснок","2 зуб."],["Уксус винный","2 ст.л."],["Изюм или курага","50г"],["Фисташки или кедровые орехи","горсть"],["Мята и петрушка","пучок"],["Масло оливковое","3 ст.л."],["Соль","½ ч.л."]],
+["Чеснок с изюмом+уксусом — оставьте на час.","Свёклу и яблоко нарежьте тонкой соломкой (мандолина), полейте соком лимона.","Смешайте всё, добавьте зелень, орехи, масло, соль."]],
+
+["tomato-salsa","salads","Томатная сальса","🍅","10 мин",4,0,"Свежая сальса — к рыбе, тако, боулам и просто как соус",
+[["Томаты","250г"],["Красный лук","½ шт"],["Чеснок","1 зуб."],["Кинза или укроп","пучок"],["Масло оливковое","1 ст.л."],["Уксус винный","1 ст.л."],["Соль","⅓ ч.л."],["Перец","щепотка"]],
+["Томаты, лук, зелень, чеснок нарежьте мелко.","Заправьте маслом и уксусом, посолите, перемешайте.","Хранить не более суток."]],
+
+["coleslaw","salads","Коул слоу","🥬","10 мин",3,0,"Капустный салат к мясу, рыбе, тако и бургерам",
+[["Белокочанная или красная капуста","150г"],["Морковь","2 шт"],["Красный лук","½ шт"],["Майонез","1 ст.л."],["Йогурт греческий","1 ст.л."],["Сок и цедра лайма","1 шт"],["Мёд","1 ч.л."],["Горчица дижонская","1 ч.л."],["Соль","⅓ ч.л."]],
+["Тонко нашинкуйте капусту, морковь и лук — лучше на мандолине.","Смешайте заправку из всех остальных ингредиентов.","Заправьте, дайте постоять 10 мин."]],
+
+["cvetnaya-kap-miso","salads","Цветная капуста в мисо соусе","🥦","40 мин",3,0,"Соцветия запечённые с мисо соусом и кунжутом",
+[["Цветная капуста","1 кочан"],["Масло оливковое","2 ст.л."],["Мисо паста","1 ст.л."],["Соевый соус","1 ст.л."],["Кунжутное масло","1 ст.л."],["Вода","2 ст.л."],["Сок лимона","2 ст.л."],["Чеснок","1 зуб."],["Имбирь","1 ч.л."],["Орехи или семечки","горсть"]],
+["Капусту разберите на соцветия, полейте оливковым маслом, запекайте 30 мин при 180°C.","Соус: мисо+соевый+кунжутное масло+вода+лимон+чеснок+имбирь — размешайте.","Капусту выложите на тарелки, полейте соусом, посыпьте орехами."]],
+
+["cvetnaya-kap-thina","salads","Запечённая цветная капуста с тхиной","🥦","1 ч",4,0,"Целый кочан капусты со специями под соусом тхины",
+[["Цветная капуста целая","1 кочан"],["Паприка","1 ч.л."],["Зира","1 ч.л."],["Куркума","1 ч.л."],["Сухой чеснок","1 ч.л."],["Соль","1 ч.л."],["Масло оливковое","3 ст.л."],["Тхина","3 ст.л."],["Вода","80г"],["Сок лимона","½ шт"],["Мёд","1 ч.л."]],
+["Кочан капусты отварите в кипящей воде 5 мин.","Смешайте специи с маслом, тщательно натрите капусту.","Запекайте 50 мин при 180°C.","Соус: тхина+вода+сок лимона+соль+мёд. Полейте перед подачей."]],
+
+["zapech-bat","salads","Запечённый батат / морковь / перцы","🍠","30 мин",4,0,"Базовый запечённый гарнир — в боул или как самостоятельный",
+[["Батат или морковь или болгарские перцы","600г"],["Масло оливковое","2 ст.л."],["Соль","1 ч.л."],["Специи на выбор","карри/зира/паприка"]],
+["Нарежьте или разрежьте пополам. Смешайте с маслом, солью, специями.","Выложите в один слой на противень.","Запекайте 25–40 мин при 190°C до карамелизации."]],
+
+["grechka-bowl","salads","Гречка боул","🫙","30 мин",5,0,"Гречка с яйцами, хумусом, свёклой и оливками",
+[["Гречка","250г"],["Вода","500г"],["Масло сл.","20г"],["Соль","1 ч.л."],["Яйца","10 шт"],["Хумус","по вкусу"],["Оливки","горсть"],["Руккола","горсть"],["Пармезан","по вкусу"],["Чили хлопья","по вкусу"]],
+["Гречку обжарьте на масле, залейте кипятком, варите 20 мин под крышкой.","Яйца варите 7–8 мин в кипятке, залейте холодной водой.","Заправка: масло+уксус+горчица+мёд+соль+перец. Хранится до месяца.","Сборка: хумус+яйца+гречка+руккола+свёкла+оливки+заправка+сыр+орехи."]],
+
+["bowl-krevetki","salads","Боул с креветками и томатной сальсой","🦐","30 мин",5,0,"Рис с креветками, свежей сальсой и тёртой морковью",
+[["Рис басмати","250г"],["Вода","425г"],["Соль","½ ч.л."],["Креветки","800г"],["Томаты","250г"],["Красный лук","½ шт"],["Кинза","пучок"],["Морковь","2 шт"],["Масло оливковое","3 ст.л."],["Уксус винный","3 ст.л."],["Соль для заправки","½ ч.л."]],
+["Рис промойте, залейте кипятком, варите 15–17 мин под крышкой.","Креветки разморозьте, очистите, окуните в кипяток на 3 мин.","Сальса: томаты+лук+зелень+чеснок мелко, заправьте половиной заправки.","Морковь натрите, заправьте перед подачей. Сборка: рис+креветки+сальса+морковь."]],
+
+["bowl-frikadeli","salads","Боул с куриными фрикадельками и соусом ромеско","🧆","50 мин",5,1,"Киноа с запечёнными фрикадельками, брокколи и ромеско",
+[["Куриный фарш","1 кг"],["Лук","3 шт"],["Чеснок","2 зуб."],["Яйцо","1 шт"],["Сухари","20г"],["Соль","1 ч.л."],["Перец","½ ч.л."],["Брокколи","1 кочан"],["Киноа","250г"],["Морковь","3 шт"],["Болгарский перец","4 шт"],["Миндаль","50г"],["Пармезан","50г"],["Уксус","3 ст.л."],["Масло оливковое","50г"]],
+["Лук+чеснок обжарьте, пробейте блендером, добавьте к фаршу с яйцом, специями, сухарями.","Скатайте фрикадельки. Часть заморозьте на доске, часть на противень.","Рядом с фрикадельками — брокколи с солью и маслом. Запекайте 25 мин при 180°C.","Киноа обжарьте на масле, варите 15 мин. Перцы запеките 40–50 мин, очистите, пробейте с уксусом+чесноком+пармезаном+миндалём+маслом.","Сборка: киноа+фрикадельки+брокколи+морковь+ромеско."],
+"Фрикадельки — из морозилки с бульоном 10 мин."],
+
+["bowl-salmon","salads","Боул с лососем в мисо","🐟","20 мин",5,0,"Мисо лосось с собой, капустой, морковью и эдамаме",
+[["Лосось или форель","800г"],["Мисо паста","1 ст.л."],["Сок лимона/лайма","¼ шт"],["Соба или яичная лапша","250г"],["Кунжутное масло","1 ст.л."],["Соевый соус","1 ст.л."],["Капуста","кулак"],["Морковь","1–2 шт"],["Эдамаме замороженные","100г"],["Манго опционально","½ шт"]],
+["Мисо+сок лимона — нанесите на рыбу в сковороде на бумаге.","⅓ стакана воды под бумагу, накройте, 8–10 мин.","Собу варите 5 мин, промойте, заправьте маслом+соевым.","Капусту и морковь нашинкуйте, заправьте. Эдамаме — кипяток на 2 мин.","Сборка: лосось+соба+капуста+морковь+эдамаме+кунжут."]],
+
+["zapech-svinina","salads","Запечённая свиная вырезка в соусе","🥩","50 мин",4,0,"Свинина со специями на подушке из нута, шпината и томатов",
+[["Свиная вырезка","500–700г"],["Соль","½ ч.л."],["Перец","⅓ ч.л."],["Паприка","1 ч.л."],["Зира","1 ч.л."],["Корица","½ ч.л."],["Нут конс.","½ банки"],["Томаты черри","200г"],["Шпинат","100г"],["Лук","1 шт"],["Чеснок","1 зуб."],["Паста карри","½ ч.л."],["Цедра и сок апельсина","1 шт"]],
+["Свинину обваляйте в специях, быстро обжарьте на сильном огне со всех сторон.","Запекайте при 180°C 40 мин до 63°C внутри.","Лук+чеснок обжарьте, добавьте томаты, нут, шпинат, пасту карри, цедру+сок апельсина.","Свинине дать отдохнуть 5 мин, нарезать, подать на соусе."]],
+
+["vetshina-indeika","salads","Ветчина из индейки","🦃","2 ч",6,1,"Домашняя ветчина из бедра индейки с нитритной солью",
+[["Бедро индейки без кости","1–1.2 кг"],["Нитритная соль","10г"],["Обычная соль","10г"],["Перец","4г"],["Паприка копчёная","10г"],["Горчица дижонская","10г"],["Мёд","25г"],["Сухой чеснок","10г"]],
+["Смешайте маринад, тщательно смажьте мясо, заверните в плёнку. Холодильник на сутки–трое.","Обвяжите шпагатом для круглой формы. Запекайте при 140°C 1.5 ч до 72°C внутри.","Полностью охладите, нарежьте слайсами."],
+"Замораживайте целиком или слайсами. Размораживайте через холодильник."],
+
+["utka-confit","salads","Утиные ножки конфи","🦆","5 ч",4,1,"Утиные ножки, томлённые в масле 4 часа, с винно-апельсиновым соусом",
+[["Утиные ножки","4 шт"],["Розмарин+тимьян","пучок"],["Соль","1 ч.л."],["Перец","1 ч.л."],["Чеснок","2 зуб."],["Соевый соус","2 ст.л."],["Мёд","1 ст.л."],["Масло растительное","800г"],["Белое вино","200г"],["Сок апельсина","100г"],["Сахар","1 ст.л."],["Масло сл. для соуса","15г"]],
+["Ножки замаринуйте в соли, перце, травах, мёде, соевом. Холодильник час–сутки.","В форму, залейте маслом полностью, закройте фольгой. 140°C 4 часа.","Откиньте на сито, обжарьте кожей вниз до корочки.","Соус: вино+сок+сахар — выпарите до меда, добавьте масло."],
+"Приготовьте за 3 дня, обжарьте перед подачей."],
+
+["buzhenina","salads","Буженина из свинины (2 варианта)","🐷","2.5 ч",8,1,"С нитритной солью (розовая, ветчинная) или без (классическая)",
+[["Свинина лопатка или окорок","1 кг"],["Нитритная соль (вариант 1)","10г"],["Обычная соль","7–15г"],["Перец","1 ч.л."],["Паприка копчёная","1 ч.л."],["Горчица","1 ч.л."],["Мёд","1 ст.л."],["Сухой чеснок","1 ч.л."],["Красное вино (соус)","300г"],["Апельсиновый джем","300г"],["Ананасовый сок","½ стакана"],["Корица","1 ч.л."],["Анчоус","1 звёздочка"]],
+["С нитритной: смажьте специями, плёнка, холодильник 1–2 суток. Без: варите в воде 1 ч с овощами.","Надрежьте верх, смажьте маслом, запекайте 40–60 мин при 180°C.","Соус: вино+джем+сок+специи — проварите до меда. С ананасом и гвоздикой — последние 15 мин.","Остудите, нарежьте слайсами."],
+"Замораживайте целиком или слайсами. Отлично для бутербродов."],
+// ── DESSERTS ──
+["tiramisu","desserts","Тирамису классический","☕","30 мин + охл.",10,0,"Нежный итальянский десерт с маскарпоне и кофе",
+[["Печенье савоярди","20 шт"],["Американо","300г"],["Марсала или ром","70г"],["Сахар","70г"],["Яйца","3 шт"],["Маскарпоне","400г"],["Какао","3 ст.л."]],
+["Кофе соедините с вином. Сахар поровну.","Белки взбейте с ½ сахара 5 мин. Желтки с ½ сахара 3–5 мин.","Желтки разотрите с маскарпоне, в два этапа введите белки.","Савоярди окуните в кофе на секунды, выложите слой. Сверху крем. Повторите.","Накройте плёнкой, холодильник минимум 4 ч. Посыпьте какао."]],
+
+["pavlova","desserts","Павлова","🍓","2 ч",6,0,"Хрустящее безе со взбитыми сливками и вишнёвым соусом",
+[["Белки","150г"],["Сахар","180г"],["Крахмал кукурузный","1 ст.л."],["Яблочный уксус","1 ст.л."],["Сливки 33%","500г"],["Вишня замороженная","400г"],["Сахар для соуса","30г"],["Корица","1 ч.л."],["Крахмал для соуса","2 ч.л."]],
+["Белки взбейте с сахаром 10+ мин до устойчивой пены. Добавьте крахмал+уксус, 1 мин.","Духовку нагрейте до 80°C (конвекция). Отсадите безе.","Выпекайте 80–120 мин до сухого дна. Внутри — мягко.","Вишню нагрейте с специями+сахаром, загустите крахмалом. Охладите.","На безе — взбитые сливки, сверху соус."]],
+
+["banana-cake","desserts","Банановый кекс","🍌","1 ч",15,1,"Плотный кекс из перезрелых бананов с шоколадом и орехами",
+[["Бананы спелые","300г"],["Яйца","2 шт"],["Масло сл.","50г"],["Масло раст.","50г"],["Сахар","80–100г"],["Соль","½ ч.л."],["Сода","1 ч.л."],["Тёмный шоколад","70г"],["Грецкие орехи","70г"],["Мука спельта/пшеница","170г"],["Корица","½ ч.л."],["Кардамон","2 коробочки (перемолоть)"],["Бадьян","½ звёздочки (перемолоть)"]],
+["Бананы разомните вилкой. Яйца+сахар+оба масла — венчиком.","Шоколад и орехи порубите. Специи перемолите.","Мука+сода, перемешайте. Шоколад+орехи+специи.","Выложите в форму, запекайте 40–50 мин при 180°C."],
+"Замораживайте ломтиками. Размораживайте при комнатной температуре."],
+
+["cherry-cake","desserts","Кекс с творогом и вишней","🍒","1 ч",8,1,"Нежный кекс на песочном тесте с творожной начинкой и вишней",
+[["Мука пшеничная","270г"],["Яйцо","30г (½ шт)"],["Масло сл. холодное","140г"],["Сахарная пудра","64г"],["Творог плотный","300г"],["Сахар","30г"],["Яйцо","1 шт"],["Ваниль","1 ч.л."],["Крахмал","1 ст.л."],["Вишня замороженная","150г"]],
+["Мягкое масло взбейте с пудрой, добавьте яйцо, взбейте, всыпьте муку. Тесто в холодильник на 2 ч.","Творог+сахар+яйцо+ваниль+крахмал пробейте блендером.","Тесто разделите на 15 частей, раскатайте кружки 8 см.","На каждый кружок — творожная начинка+вишня, сформируйте сочни.","Запекайте 20 мин при 180°C."],
+"Замораживайте готовыми. Разогрейте в духовке 10 мин."],
+
+["sochni","desserts","Сочни с творогом","🧡","30 мин",15,1,"Открытые песочные пирожки с творожной начинкой",
+[["Мука","270г"],["Масло сл. холодное","140г"],["Сахарная пудра","64г"],["Яйцо","30г"],["Творог зерновой","500г"],["Сахар","50г"],["Яйцо (начинка)","1 шт"]],
+["Масло разотрите с пудрой, добавьте яйцо, муку. Тесто в холодильник.","Начинка: творог+сахар+яйцо.","Тесто разделите на 15 частей, раскатайте в кружки 8 см.","Выложите начинку, сложите пополам, не защипывая до конца.","Запекайте 20 мин при 180°C."],
+"Замораживайте готовыми."],
+
+["rogaliki","desserts","Рогалики с мёдом и орехами","🥐","45 мин",48,1,"Слоёные рогалики из сметанного теста с ореховой начинкой",
+[["Масло сл. холодное","150г"],["Сметана или йогурт","250г"],["Мука","350г"],["Орехи (фундук, миндаль)","100г"],["Сахар","50г"],["Мёд","40г"],["Корица","1 ч.л."],["Яйцо для смазывания","1 шт"]],
+["Масло натрите с мукой в крошку. Добавьте сметану, замесите тесто. Разделите на 4 части, холодильник 1–24 ч.","Орехи порубите, сахар смешайте с корицей.","Раскатайте каждую часть тонко в круг. Посыпьте орехами, полейте мёдом, добавьте сахар с корицей.","Нарежьте как торт на 12 частей, скатайте рогалики. Смажьте яйцом.","Запекайте 25 мин при 180°C."],
+"Заморозьте сырыми (без яйца) на доске, потом в пакет. Выпекайте из морозилки."],
+
+// BAKING
+["kulich-ruchnoy","baking","Кулич (без миксера)","🐣","3 ч",2,1,"Пасхальный кулич для ручного замеса — плотный и ароматный",
+[["Мука для хлеба (12–13г белка)","370г"],["Молоко","130г"],["Масло сл. растопленное","90г"],["Дрожжи свежие","10г (или 5г сухих)"],["Яйца","2 шт"],["Желтки","2 шт"],["Сахар","110г"],["Соль","4г"],["Ваниль","1 ч.л."],["Цедра апельсина","1 шт"],["Изюм/сухофрукты","100г"]],
+["Дрожжи растворите в тёплом молоке с 1 ч.л. сахара, оставьте 10 мин.","Яйца+желтки+сахар+соль+ваниль+цедра взбейте. Добавьте опару+масло.","Постепенно вводите муку, месите руками 10–15 мин. Тесто должно тянуться.","Накройте, расстойка 2–3 ч. Обомните, введите сухофрукты.","Разложите по формам (½ объёма), расстойка 1–1.5 ч. Смажьте желтком.","Запекайте при 160°C 35–45 мин. Охладите, покройте кремом или глазурью."],
+"Замораживайте готовым в плёнке. Размораживайте при комнатной температуре."],
+
+["kulich-mixer","baking","Кулич (планетарный миксер)","🐣","4 ч",2,1,"Воздушный кулич на миксере с карамелью внутри",
+[["Мука для хлеба","370г"],["Молоко","130г"],["Масло сл.","90г"],["Дрожжи свежие","10г"],["Яйца","2 шт"],["Желтки","2 шт"],["Сахар","110г"],["Соль","4г"],["Ваниль","1 ч.л."],["Карамель готовая","2–3 ст.л."],["Изюм/сухофрукты","100г"],["Маскарпоне (крем)","180г"],["Сахарная пудра (крем)","30г"],["Сливки 33% (крем)","60г"]],
+["Тесто замесите на миксере насадкой крюк 10–15 мин.","Расстойка 2–3 ч, обомните, введите сухофрукты+слои карамели.","Формы (½ объёма), расстойка 1–1.5 ч, смажьте желтком.","Запекайте 160°C 35–45 мин. Охладите.","Крем: маскарпоне+пудра+сливки взбейте. Покройте кулич."],
+"Замораживайте в плёнке."],
+
+["makovy-rulet","baking","Маковый рулет","🌀","2 ч",10,1,"Дрожжевой рулет с маковой начинкой и шоколадной глазурью",
+[["Мука","400г"],["Вода","195г"],["Сахар","60г"],["Масло сл. растопленное","50г"],["Дрожжи свежие","10г (или 5г сухих)"],["Яйцо","1 шт"],["Соль","6г"],["Мак","200г"],["Молоко","400г"],["Сахар (начинка)","100г"],["Цедра апельсина","1 шт"],["Белок","1 шт"],["Шоколад молочный","100г"],["Масло раст.","20г"]],
+["Тесто: дрожжи+вода+соль+сахар+мука+масло, месите 10 мин. Расстойка 2 ч.","Начинка: мак промойте, варите 40 мин в молоке. Добавьте сахар+цедру, охладите. Добавьте белок+мягкое масло.","Раскатайте тесто тонко, выложите начинку. Сверните рулет, защипните.","Расстойка 1–1.5 ч. Запекайте 35 мин при 180°C. Охладите.","Шоколад+масло растопите, полейте рулет."],
+"Начинку заготовьте впрок и заморозьте порционно."],
+
+["vastla","baking","Вастла куккель (финские булочки)","🫐","3 ч",10,1,"Кардамонные булочки с ягодной начинкой и взбитым кремом",
+[["Мука","480г"],["Дрожжи свежие","15г (или 7г сухих)"],["Молоко","250г"],["Масло сл.","90г"],["Соль","7г"],["Кардамон молотый","1 ч.л."],["Яйцо","1 шт"],["Сахар","40г"],["Малина зам.","400г"],["Смородина зам.","150г"],["Сахар (начинка)","40г"],["Крахмал","1 ч.л."],["Корица","1 ч.л."],["Цедра+сок лайма","1 шт"],["Сливки 33%","500г"],["Творожный сыр","250г"],["Пудра","50г"]],
+["Масло растопите с молоком, соедините с яйцом. Добавьте остальные ингредиенты теста, месите 7–10 мин.","Расстойка 1.5 ч. Разделите на 10 шаров. Расстойка 1 ч.","Начинка: нагрейте ягоды, загустите крахмалом+сахаром+специями. Охладите.","Крем: сливки+сыр+пудра+ваниль взбейте.","Срежьте верхушки булочек, выньте мякоть. Начините ягодами, сверху крем."],
+"Тесто после первой расстойки — в холодильник до суток."],
+
+["brauni-cheesecake","baking","Брауни-чизкейк с вишней","🍫","1 ч",8,1,"Шоколадное брауни с творожным слоем и замороженными ягодами",
+[["Шоколад 55–70%","50г"],["Масло сл.","30г"],["Яйца","2 шт"],["Сахар","30г"],["Мука","100г"],["Сода","½ ч.л."],["Фундук или миндаль","80г"],["Творожный сыр","200г"],["Яйцо (творожный)","1 шт"],["Сахар (творожный)","30г"],["Ваниль","по вкусу"],["Вишня зам.","100г"]],
+["Шоколад с маслом растопите, немного остудите. Яйца с сахаром взбейте. Орехи перемолите.","Соедините яичную и шоколадную массы, добавьте муку+соду+орехи.","Творожный слой: все ингредиенты пробейте блендером.","В форму хаотично — оба теста. В тесто утопите вишню.","Выпекайте 35 мин при 170°C. Форма 18 см."],
+"Замораживайте порционно. Размораживайте при комнатной температуре."],
+
+["smetannik","baking","Сметанник в стакане","🫙","1 ч",6,1,"Тортики в стаканах с основой из брауни, карамелью и сметанным кремом",
+[["Шоколад тёмный","100г"],["Масло сл.","80г"],["Яйца","2 шт"],["Сахар","40г"],["Мука","20г"],["Разрыхлитель","½ ч.л."],["Фундук или миндаль","80г"],["Сметана 30%","250г"],["Чернослив","100г"],["Карамель","порция"]],
+["Шоколад+масло растопите. Яйца с сахаром взбейте. Орехи перемолите, соедините с мукой+разрыхлителем.","Соедините все части теста. Выпекайте в форме 30 мин при 180°C. Остудите.","Сметану взбейте на высокой скорости 5–10 мин до воздушности. Чернослив нарежьте четвертинками.","Соберите: кусочки брауни+карамель+сметана+чернослив."],
+"Замораживайте без крема."],
+
+["scones","baking","Сконы","🫐","30 мин",12,1,"Быстрые рассыпчатые сконы с ягодами или изюмом",
+[["Масло сл. холодное","80г"],["Сахар","30г"],["Соль","1г"],["Мука (спельта)","150г"],["Овсянка","30г"],["Ягоды зам. мелкие или изюм","50г"],["Холодная вода","30–50г"]],
+["Духовку нагрейте до 170°C.","Холодное масло разотрите с мукой, сахаром, солью, овсянкой в крошку.","Добавьте воду ровно столько, чтобы тесто собралось. Добавьте ягоды.","Раскатайте между пергаментом 2 см, нарежьте хаотичными треугольниками.","Если есть время — заморозьте на 10 мин. Выпекайте 25 мин."],
+"Заморозьте до выпечки. Пеките из морозилки."],
+
+["vatrushki","baking","Ватрушки с творогом и ягодами","🫐","2 ч",5,1,"Дрожжевые булочки с творожным слоем и черникой",
+[["Мука пш.","220г"],["Мука цз.","50г"],["Молоко","110г"],["Масло сл.","30г"],["Дрожжи свежие","6г (или 2.5г сухих)"],["Соль","2г"],["Сахар","30г"],["Яйцо","1 шт"],["Кардамон","½ ч.л."],["Творог/маскарпоне","250г"],["Сахар (начинка)","30г"],["Желток","1 шт"],["Крахмал","1 ч.л."],["Черника зам.","200г"],["Масло сл. (крамбл)","20г"],["Сахар (крамбл)","15г"],["Мука (крамбл)","20г"]],
+["Тесто замесите, расстойка 1.5 ч. Разделите на 5 шаров, расстойка 40 мин.","Творожный слой: все ингредиенты смешайте.","Крамбл: разотрите масло+сахар+муку в крошку.","Сделайте углубления стаканом. Наполните творогом+черникой+крамблом.","Запекайте 20–25 мин при 170°C."],
+"Тесто после первой расстойки — в холодильник до суток."],
+
+["eclair","baking","Заварные пирожные / эклеры","🍮","2 ч",35,1,"Классическое заварное тесто с кремом муслин и маскарпоне",
+[["Молоко","180г"],["Вода","180г"],["Масло сл.","170г"],["Соль","5г"],["Сахар","5г"],["Мука","200г"],["Яйца","270–300г"],["Молоко (крем)","200г"],["Сливки 30–35%","135г"],["Желтки (крем)","80г"],["Сахар (крем)","50г"],["Крахмал (крем)","30г"],["Масло сл. (крем)","140г"],["Маскарпоне","120г"],["Ваниль","1 ч.л."]],
+["Молоко+вода+масло+соль+сахар довести до кипения. Снять, всыпать муку, мешать. Вернуть на огонь 2–3 мин до корочки на дне.","Охладить до 50–55°C, постепенно вводить взбитые яйца. Тесто = медленная лента.","Отсадить шу 3–4 см, посыпать сахарной пудрой. Духовка 170°C без конвекции, 40–60 мин.","Крем: молоко+сливки+ваниль нагреть. Желтки+сахар+крахмал разотрите, влейте молоко, варите до загустения.","При 35°C ввести масло+маскарпоне, пробить блендером. Стабилизировать 2–3 ч. Наполнить шу."],
+"Испечённые шу заморозьте до 7 дней. Разогрейте при 160°C 10 мин, начините."],
+
+["medovik","baking","Медовик","🍯","3 ч",10,1,"Классический медовый торт с заварным кремом на сметане",
+[["Сахар","130г"],["Вода","20г"],["Мёд гречишный","50г"],["Масло сл.","90г"],["Яйца","80г"],["Сода","5г"],["Сок лимона","1 ст.л."],["Мука","330г"],["Молоко (крем)","400г"],["Ваниль","1 ст.л."],["Желтки","100г"],["Мёд (крем)","20г"],["Сахар (крем)","60г"],["Крахмал (крем)","25г"],["Сметана 30% отвешенная","400г"]],
+["Сахар+вода нагреть до янтарного. Добавить мёд+масло, прокипятить. Перелить в чашу, добавить соду+лимон, венчиком яйца, муку.","Разделить на 5 частей (120г). Раскатать тонко, выпекать каждый корж 10 мин при 180°C. Сразу вырезать круги.","Крем: желтки+сахар+мёд+крахмал разотрите, влейте горячее молоко, варите до загустения. Охладите.","Холодный крем смешайте с отвешенной сметаной.","Собрать торт, промазывая каждый корж. Холодильник 4+ ч. Обрезки перемолоть для посыпки."],
+"Замораживайте готовым. Размораживайте через холодильник."],
+
+["napoleon","baking","Наполеон за 30 минут","🥐","40 мин",6,0,"Слоёное тесто с кремом и ягодным соусом — быстрая версия",
+[["Готовое слоёное тесто","400–500г"],["Ягоды зам. (вишня, малина)","300г"],["Сахар","50г"],["Крахмал","1 ч.л."],["Сливки 30%","400г"],["Творожный сыр","80г"],["Пудра","70г"]],
+["Тесто разморозьте 4+ ч в холодильнике, разделите на 4 части.","Ягоды+сахар — до кипения, загустите крахмалом, уберите в морозилку.","Запекайте тесто 20 мин при 180°C. Остудите, разделите вдоль при необходимости.","Крем: сливки+сыр+пудра взбейте.","Прослоите кремом и ягодным соусом. Холодильник 4 ч."]],
+
+["rogdestv-poleno","baking","Рождественское полено","🪵","1 ч",6,1,"Шоколадный бисквитный рулет с маскарпоне и ягодами",
+[["Мука","60г"],["Яйца","100г"],["Желтки","40г"],["Сахар","60г"],["Белки","60г"],["Сахар (белки)","20г"],["Ягоды (малина, вишня)","200г"],["Сахар (ягоды)","30г"],["Крахмал","1 ч.л."],["Корица","½ ч.л."],["Цедра апельсина","½ шт"],["Сливки 30%","130г"],["Маскарпоне","250г"],["Пудра","30г"],["Ром (опц.)","30г"],["Шоколад 54%","200г"],["Сливки (шок. крем)","200г"],["Масло сл.","40г"]],
+["Шоколадный крем: сливки до кипения, вылить на шоколад, пробить, добавить масло. Стабилизировать.","Ягоды с цедрой+сахаром — до кипения, загустите крахмалом. Охладите.","Бисквит: белки взбейте с сахаром. Яйца+желтки+сахар взбейте. Соедините, просейте муку. Распределите на противень, 10–12 мин при 180°C.","Переложите на полотенце, отделите бумагу. Охладите.","Крем: сливки+маскарпоне+пудра+ваниль+ром взбейте. Распределите по бисквиту, выложите ягоды. Скрутите, холодильник 1 ч.","Покройте шоколадным кремом. Украсьте."],
+"Рулет без шоколадного покрытия — заморозьте. Покройте после разморозки."],
+
+["yagodny-pirog","baking","Ягодно-творожный пирог","🫐","1.5 ч",8,1,"Песочная основа с творожным и ягодным слоем",
+[["Мука","160г"],["Масло сл. холодное","80г"],["Сахар","20г"],["Цедра лимона","1 шт"],["Соль","2г"],["Вода холодная","30–50г"],["Творожный сыр/Филадельфия","400г"],["Яйцо","1 шт"],["Сахар (творог)","30г"],["Сок лимона","1 ст.л."],["Ваниль","1 ч.л."],["Черника/малина зам.","300г"],["Сахар (ягоды)","40г"],["Крахмал","1 ч.л."]],
+["Тесто: мука+сахар+соль+цедра, перетрите с маслом. Добавьте воду, быстро замесите. Раскатайте в форму, в морозилку.","Творожный слой: все пробейте блендером.","Ягоды+сахар нагрейте, загустите крахмалом.","На замороженную основу — творожный слой, сверху ягодный.","Запекайте 40 мин при 175°C. Охладите."],
+"Замораживайте готовым. Размораживайте через холодильник."],
+
+["pryaniki","baking","Хрустящие пряники","🍪","3 ч",30,1,"Карамельные пряники из гречишного мёда с глазурью",
+[["Сахар коричневый","100г"],["Сахар белый","100г"],["Мёд гречишный","30г"],["Кипяток","100г"],["Масло сл.","100г"],["Корица","1 ч.л."],["Имбирь сухой","1 ч.л."],["Сода","½ ч.л."],["Яйцо","1 шт"],["Мука","400–500г"]],
+["Сахар+мёд нагрейте до карамельного цвета, влейте кипяток (осторожно!), добавьте масло.","Добавьте специи, соду — масса вырастет. Охладите до 55°C. Введите яйцо+муку.","Тесто в плёнку, холодильник 2–4 ч.","Раскатайте 4–5 мм, вырежьте фигурки.","Выпекайте 6–8 мин при 180°C. Не передержите."],
+"Замораживайте заготовки до выпечки."],
+
+["funduk-cookie","baking","Фундучное печенье с солёной карамелью","🍪","3 ч",30,1,"Рассыпчатое фундучное печенье-сэндвич с карамелью",
+[["Яйца","50г"],["Сахар с ванилью","1 ч.л."],["Мука","200г"],["Сахар","70г"],["Масло сл. холодное","160г"],["Фундук обжаренный молотый","100г"],["Соль","1г"],["Сахар (карамель)","150г"],["Сироп глюкозы","30г"],["Вода","20г"],["Сливки 33%","150г"],["Масло сл. (карамель)","75г"],["Соль (карамель)","2г"]],
+["Мука+сахар+ореховая мука+соль — в крошку с маслом. Добавьте яйцо. Раскатайте между пергаментом 4–5 мм, холодильник 2 ч.","Вырубите круги 4–6 см, заморозьте. Духовка 165°C конвекция 12–15 мин. Остудите.","Карамель: сахар+глюкоза+вода до янтарного. Влейте горячие сливки, добавьте масло+соль. Пробейте, охладите.","Нанесите карамель на половинки, накройте второй половинкой.","Холодильник."],
+"Заготовки теста — в морозилку. Готовое печенье — 5 дней в холодильнике."],
+
+["miso-cookie","baking","Печенье с мисо и белым шоколадом","🍪","40 мин",15,1,"Мягкое печенье с пастой мисо и кусочками белого шоколада",
+[["Масло сл. холодное","150г"],["Сахар","100г"],["Паста мисо","40г"],["Яйцо","1 шт"],["Разрыхлитель/сода","2г"],["Мука","220г"],["Белый шоколад","80г"]],
+["Масло разотрите с мукой и сахаром в крошку. Добавьте мисо+яйцо+разрыхлитель — перемешайте.","Скатайте шарики. Холодильник 20 мин — ночь (или заморозьте в зип-пакете).","Выпекайте при 190°C 12–18 мин в зависимости от желаемой хрустящести."],
+"Замораживайте шариками. Выпекайте без разморозки, +2–3 мин к времени."],
+
+// ── АПРЕЛЬ ──
+["chicken-yogurt-nout","poultry","Курица с йогуртом, нутом и цукини","🫙","40 мин",4,0,"Куриные бёдра в карри-маринаде с нутом, кускусом и соусом дзадзики",
+[["Куриные бёдра б/к","500г"],["Йогурт греческий","2 ст.л."],["Соль","½ ч.л."],["Перец","⅓ ч.л."],["Карри","1 ч.л."],["Лук красный","1 шт"],["Нут конс.","1 банка"],["Цукини","1 шт"],["Зира","1 ч.л."],["Чили хлопья","⅓ ч.л."],["Чеснок","2 зуб."],["Кускус","50г"],["Кипяток","100г"],["Йогурт (соус)","150г"],["Укроп+мята","пучок"],["Сок лимона","2 ст.л."]],
+["Курице добавьте йогурт+соль+перец+карри, оставьте 10 мин.","Кускус залейте 100г кипятка, накройте.","Лук и цукини крупно, чеснок мелко. Нут промойте.","Курицу жарьте на средне-сильном огне по 9 мин с каждой стороны.","Обжарьте цукини+лук+чеснок+нут+зира+чили 7–10 мин.","Соус: чеснок+укроп+мята+йогурт+цедра+лимон.","Сборка: кускус+овощи+нарезанная курица+соус."]],
+
+["orzo-chicken","poultry","Орзо с вялеными томатами и курицей","🍝","25 мин",4,0,"Паста орзо, приготовленная прямо в томатном соусе с курицей и шпинатом",
+[["Орзо","130г"],["Лук","1 шт"],["Чеснок","2 зуб."],["Вяленые томаты","50г"],["Белое вино","100г"],["Шпинат свежий","100г"],["Куриное филе","1 шт"],["Томатная пассата","200г"],["Вода/бульон","200г"],["Соль","1 ч.л."],["Перец","½ ч.л."],["Творожный сыр","2 ст.л."],["Пармезан","по вкусу"]],
+["Курицу нарежьте кусочками, посолите, поперчите.","Лук, чеснок, томаты мелко. Обжарьте лук+томаты 7 мин, добавьте чеснок+вино — выпарьте.","Всыпьте орзо, влейте пассату+воду, соль, перец. Доведите до кипения, убавьте, 13 мин.","За 5 мин до конца — курица+шпинат. В конце — творожный сыр.","Подавайте с пармезаном."]],
+
+["juicy-breast-marinade","poultry","Сочная куриная грудка в маринаде","🍗","20 мин",4,1,"Секрет — нарезать тонко, замариновать заранее и не пережарить",
+[["Куриная грудка","500–600г"],["Соль","½ ч.л."],["Перец","⅓ ч.л."],["Масло раст.","2 ст.л."],["Мёд","1 ч.л."],["Горчица дижонская","1 ч.л."],["Соевый соус","1 ст.л."],["Чеснок","1 зуб."],["Паприка копчёная","1 ч.л."],["Сок лайма","½ шт"]],
+["Грудку нарежьте не толще 2 см. Смешайте все ингредиенты маринада. Маринуйте минимум 5–6 часов.","Жарьте на средне-сильном огне по 3 мин с каждой стороны.","Переложите в миску, накройте, дайте отдохнуть 5 мин."],
+"Замаринуйте и заморозьте сырой. Жарьте после разморозки."],
+
+["kebab","beef","Кебаб","🥙","40 мин",6,1,"Фарш со специями на противне — в лепёшке с салатом и соусом из тхины",
+[["Говяжий/куриный фарш","900г"],["Лук","1 шт"],["Болгарский перец","½ шт"],["Кинза","1 пучок"],["Соль","1.5 ч.л."],["Зира","1.5 ч.л."],["Куркума","1.5 ч.л."],["Паприка","1.5 ч.л."],["Корица","1 ч.л."],["Сухой чеснок","1.5 ч.л."],["5 перцев","1 ч.л."],["Масло раст.","2 ст.л."],["Питы или лепёшки","6 шт"],["Томаты","3 шт"],["Красный лук","½ шт"],["Сумак","1 ч.л."],["Тхина","3 ст.л."],["Йогурт греческий","5 ст.л."],["Сок лимона","½ шт"]],
+["Лук+½ кинзы+½ перца измельчите мелко, соедините с фаршем и всеми специями.","Духовку нагрейте до 190°C. Противень смажьте маслом.","Выложите фарш прямоугольником не толще 2 см, разделите на полоски.","Рядом — головку чеснока в фольге. Запекайте 25 мин.","Салат: кинза+томаты+лук+сумак+масло+уксус. Соус: тхина+запечённый чеснок+лимон+йогурт+специи.","В лепёшку: кебаб+соус+салат."],
+"Фарш со специями заморозьте. Запекайте после разморозки."],
+
+["rice-beef-broccoli","beef","Рис с говядиной и брокколи","🥦","20 мин",4,0,"Жареный рис с фаршем, брокколи и азиатским соусом с яйцом",
+[["Говяжий фарш","400г"],["Рис жасмин/басмати","100г"],["Кипяток","170г"],["Брокколи","1 небольшой кочан"],["Лук","1 шт"],["Чеснок","2 зуб."],["Соевый соус","30г"],["Мёд","1 ч.л."],["Чили хлопья","⅓ ч.л."],["Сок лайма","1 ст.л."],["Яйца","2 шт"],["Соль","⅓ ч.л."],["Зелёный лук+кунжут","для подачи"]],
+["Рис промойте, залейте кипятком+соль, варите 15–17 мин.","Соус: соевый+мёд+чили+лайм. Лук, чеснок, брокколи нарежьте.","Обжарьте лук, добавьте фарш на сильном огне 5 мин. Добавьте брокколи+соус.","Добавьте рис+яйца, перемешайте. Через 2 мин снимите с огня.","Подавайте с кунжутом и зелёным луком."]],
+
+["celery-chicken-soup","soups","Суп-пюре из корня сельдерея с курицей","🥣","1 ч",4,0,"Нежный крем-суп с мягким вкусом и вариантом с копчёной курицей",
+[["Куриная грудка готовая или копчёная","250г"],["Корень сельдерея","300–400г"],["Лук","2 шт"],["Чеснок","2 зуб."],["Масло сл.","20г"],["Соль","1 ч.л."],["Перец","⅓ ч.л."],["Сливки или бульон","по вкусу"]],
+["Корень сельдерея, лук и чеснок нарежьте мелко.","Обжарьте лук 5 мин. Добавьте сельдерей+чеснок+соль+вода — накройте.","Тушите 15–20 мин до мягкости.","Пробейте блендером, добавьте сливки/бульон до нужной густоты.","Курицу нарежьте, добавьте в суп. Поперчите."]],
+
+["coconut-ramen-beef","soups","Кокосовый рамен с говяжьим фаршем","🍜","25 мин",2,0,"Рамен без долгого бульона — на кокосовом молоке с арахисовой пастой",
+[["Говяжий или куриный фарш","200г"],["Кокосовое молоко 18%","250г"],["Чеснок","3 зуб."],["Имбирь","1 кусочек"],["Зелёный лук","пучок"],["Кунжут","1 ст.л."],["Чили хлопья","½ ч.л."],["Соевый соус","3 ст.л."],["Уксус рисовый","2 ст.л."],["Арахисовая паста","1 ст.л."],["Кунжутное масло","2 ст.л."],["Лапша рамен","2 порции"],["Яйца","2 шт"],["Кипяток/бульон","700г"]],
+["Фарш обжарьте на сильном огне, добавьте ½ соевого+1 зуб. чеснока, 5–7 мин.","В кастрюле соедините чеснок+имбирь+лук+пасту+масло+чили+уксус+соевый — нагрейте.","Влейте кокосовое молоко+кипяток, доведите до кипения, добавьте лапшу.","Яйца варите 7 мин, залейте холодной водой.","Сборка: лапша+бульон+фарш+яйцо. По желанию — кукуруза или кимчи."]],
+
+["taco-nout-ananas","vegetarian","Тако с нутом и ананасовой сальсой","🌮","25 мин",6,0,"Нут со специями на мини-лепёшках с ананасовой сальсой и фетой",
+[["Нут конс.","230г"],["Куркума","½ ч.л."],["Зира","½ ч.л."],["Паприка копчёная","½ ч.л."],["Соль","½ ч.л."],["Сухой чеснок","½ ч.л."],["Яйцо","½ шт"],["Мини-лепёшки тако","6 шт"],["Ананас конс.","2 кольца"],["Огурец","1 шт"],["Красный лук","½ шт"],["Кинза/петрушка","пучок"],["Фета","70г"],["Уксус","2 ст.л."],["Масло оливковое","3 ст.л."],["Чили хлопья","⅓ ч.л."],["Фундук жареный","горсть (опц.)"]],
+["Сальса: ананас+огурец+лук+зелень+чеснок мелко, смешайте с уксусом+маслом.","Нут разомните вилкой со специями, добавьте ½ взбитого яйца. Разделите на 6.","Распределите по лепёшкам. Обжарьте нутом вниз 2 мин, переверните, 1 мин.","Добавьте сальсу+фету."]],
+
+["ovoschi-humus","salads","Запечённые овощи на подушке из хумуса","🍆","35 мин",4,0,"Баклажан с луком и перцами на бальзамике поверх домашнего хумуса",
+[["Баклажан","1 шт"],["Красный лук","1 шт"],["Болгарский перец","2 шт"],["Бальзамический крем","2 ст.л."],["Масло оливковое","2 ст.л."],["Соль","½ ч.л."],["Перец","⅓ ч.л."],["Нут конс.","1 банка"],["Тхина","30г"],["Сок лимона","⅓ шт"],["Пармезан слайсы","20г"],["Базилик","7–8 листиков"],["Уксус красный винный","2 ст.л."],["Мёд","1 ч.л."]],
+["Духовку нагрейте до 190°C. Баклажан нарежьте 1 см, лук крупно.","Смешайте с маслом+бальзамиком+соль+перец. В один слой + целые перцы. Запекайте 25–30 мин.","Перцы в миску под плёнку 5 мин, очистите, нарежьте крупно.","Хумус: нут+100г воды+соль+лимон+тхина — пробейте блендером.","Перцы+масло+уксус+мёд+пармезан+базилик — перемешайте. Выложите на хумус."]],
+
+["tuna-bean-salad","salads","Салат из тунца, фасоли и оливок","🐟","20 мин",3,0,"Сытный салат с тунцом, яйцами, фасолью и пармезаном",
+[["Яйца","2 шт"],["Тунец конс.","1 банка"],["Оливки б/к","горсть"],["Белая фасоль конс.","½ банки"],["Томаты черри","горсть"],["Салат (радичио/айсберг)","горсть"],["Пармезан","20г"],["Лук","½ шт"],["Масло оливковое","3 ст.л."],["Уксус винный","2 ст.л."],["Чили хлопья","⅓ ч.л."],["Горчица дижонская","1 ч.л."],["Соль","⅓ ч.л."],["Мёд","½ ч.л."]],
+["Яйца варите 8 мин, холодная вода, очистите.","Заправка: лук мелко+масло+уксус+чили+горчица+соль+мёд — перемешайте.","Фасоль промойте. Черри и оливки пополам. Салат нарвите.","Соедините всё, пармезан нарежьте овощечисткой."]],
+
+["celery-date-salad","salads","Салат из сельдерея и фиников","🌿","10 мин",3,0,"Хрустящий сельдерей с финиками, пармезаном и жареным миндалём",
+[["Сельдерей стебли","4 шт"],["Финики","4 шт"],["Пармезан","20г"],["Миндаль или лепестки","30г"],["Масло оливковое","2–3 ст.л."],["Соль","½ ч.л."],["Чили хлопья","¼ ч.л."],["Сок лимона","⅓ шт"],["Уксус винный","1 ст.л."]],
+["Сельдерей нарежьте слайсами, финики — кусочками.","Миндаль порубите и слегка обжарьте. Пармезан — слайсами.","Соедините всё, полейте лимоном+уксусом+маслом, посолите, добавьте чили."]],
+
+["marinov-baklazhan","salads","Маринованные баклажаны","🍆","25 мин",3,1,"Запечённые слайсы баклажанов в соево-медовом маринаде — хранятся 5 дней",
+[["Баклажаны","2 шт"],["Соевый соус","15г"],["Масло кунжутное или оливковое","15г"],["Уксус рисовый/яблочный","15г"],["Мёд","15г"],["Чеснок","2 зуб."],["Чили молотый","1 ч.л."]],
+["Духовку нагрейте до 220°C. Баклажаны нарежьте тонкими слайсами, в один слой. Запекайте 15–20 мин.","Смешайте соевый+масло+уксус+мёд+тёртый чеснок+чили.","Баклажаны в контейнер, залейте соусом, встряхните. Мариновать 30+ мин."],
+"Замораживайте без маринада. Залейте маринадом после разморозки."],
+
+["quick-rolls","snacks","Быстрые роллы в рисовой бумаге","🌯","10 мин",1,0,"Роллы с крабовыми палочками или тунцом с арахисовым соусом",
+[["Рисовая бумага","2 листа"],["Нори","1 лист"],["Крабовые палочки или тунец","4–6 шт"],["Творожный сыр или майонез","1 ст.л."],["Шрирача","1 ч.л."],["Морковь","½ шт"],["Красная капуста","немного"],["Арахисовая паста","1 ст.л."],["Соевый соус","2 ст.л."],["Уксус рисовый","1 ст.л."],["Имбирь свежий","немного"],["Мёд","1 ч.л."],["Вода","50г"]],
+["Капусту и морковь нарежьте тонко. Начинку смешайте с майонезом+шрирачей.","Соус: паста+соевый+уксус+имбирь+мёд+вода — пробейте или размешайте.","Рисовую бумагу смочите 5 сек. Два листа в нахлёст на нори.","Выложите начинку, отступив 2–3 см. Сверните плотно, край нори смочите.","Нарежьте, подавайте с соусом."]],
+
+["pasta-anchovy","snacks","Паста с анчоусами и томатами","🍝","15 мин",2,0,"Быстрая паста с соусом из анчоусов и каперсами — соль не нужна",
+[["Анчоусы","10 шт (30–40г)"],["Чеснок","1 зуб."],["Томаты конс.","1 банка"],["Сахар","½ ч.л."],["Перец","⅓ ч.л."],["Спагетти","140г"],["Каперсы","горсть"],["Пармезан","по вкусу"]],
+["Воду для пасты посолите, варите по инструкции.","Масло от анчоусов в сковороду. Обжарьте анчоусы, разбивая лопаткой.","Добавьте чеснок, томаты, сахар, перец. Убавьте огонь.","Пасту+каперсы добавьте в соус. Подавайте с пармезаном."]],
+
+["leek-spread","snacks","Намазка из лука-порея","🧅","20 мин",4,1,"Мягкий лук со шпинатом, мисо и творожным сыром — в бутерброд или как гарнир",
+[["Лук-порей","2 шт"],["Чеснок","2 зуб."],["Шпинат свежий","100г"],["Соль","⅓ ч.л."],["Перец","⅓ ч.л."],["Творожный сыр","70г"],["Горчица дижонская","1 ч.л."],["Паста мисо","1 ч.л."],["Сок и цедра лимона","⅓ шт"]],
+["Лук-порей разрежьте вдоль, промойте. Обжарьте 7 мин до мягкости, добавьте чеснок+соль+шпинат. Снимите через 3–4 мин.","Немного остудите. Добавьте цедру+сок+горчицу+мисо+творожный сыр. Перемешайте."],
+"4 дня в холодильнике."],
+
+["sauce-asian-dressing","snacks","Азиатская заправка","🥢","5 мин",4,0,"Универсальная заправка для азиатских салатов — хранится неделю",
+[["Масло кунжутное или оливковое","2 ст.л."],["Уксус винный","2 ст.л."],["Соевый соус","2 ст.л."],["Мёд","1 ст.л."],["Чили хлопья","½ ч.л."],["Чеснок","1 зуб."]],
+["Соедините все ингредиенты, хорошо перемешайте. Хранится неделю."]],
+
+["sauce-romesco","snacks","Соус ромеско","🫙","50 мин",5,1,"Запечённые перцы с миндалём и пармезаном — к мясу, пасте и боулам",
+[["Болгарский перец","4 шт"],["Уксус яблочный/винный","3 ст.л."],["Соль","⅓ ч.л."],["Перец","⅓ ч.л."],["Масло оливковое","40г"],["Чеснок","1 зуб."],["Пармезан","50г"],["Миндаль","50г"]],
+["Перцы запекайте 40–50 мин при 180°C. Остудите под плёнкой, очистите.","Пробейте блендером со всеми ингредиентами. До 4 дней в холодильнике."],
+"Замораживайте порционно в зип-пакетах."],
+
+["sauce-thina-basic","snacks","Соус из тхины","🫙","5 мин",3,0,"Базовый соус тхины — к рыбе, курице, мясу и боулам",
+[["Тхина или арахисовая паста","3 ст.л."],["Соевый соус","3 ст.л."],["Мёд","1 ч.л."],["Имбирь тёртый","1 ч.л."],["Сок лимона","⅓ шт"],["Перец","¼ ч.л."],["Острота (чили/шрирача)","по вкусу"],["Вода","для текучести"]],
+["Соедините все ингредиенты, добавьте воду до нужной текучести. До 4 дней в холодильнике."]],
+
+["sauce-vinaigrette","snacks","Заправка винегрет","🫙","5 мин",6,0,"Классическая французская заправка с горчицей и мёдом — хранится месяц",
+[["Масло оливковое","6 ст.л."],["Уксус яблочный или винный","6 ст.л."],["Горчица дижонская","3 ч.л."],["Соль","½ ч.л."],["Перец","½ ч.л."],["Мёд","3 ч.л."]],
+["Соедините все, хорошо перемешайте. До месяца в холодильнике."]],
+
+["sauce-yogurt-herb","snacks","Соус из греческого йогурта","🫙","5 мин",3,0,"Лёгкий йогуртовый соус с укропом и лимоном — к рыбе, мясу и гиросу",
+[["Йогурт греческий","150г"],["Чеснок","1 зуб."],["Укроп","пучок"],["Мята","немного (опц.)"],["Цедра лимона","½ шт"],["Сок лимона","2 ст.л."],["Соль","½ ч.л."],["Перец","⅓ ч.л."]],
+["Укроп, мяту и чеснок измельчите. Соедините с йогуртом, цедрой, соком, солью, перцем. До 3 дней."]],
+
+["zaliv-cabbage-pie","baking","Заливной капустный пирог","🥬","1 ч",8,0,"Сочный заливной пирог с тушёной капустой, яйцами и мисо",
+[["Капуста","600г"],["Морковь","1 шт"],["Лук","1 шт"],["Чеснок","1 зуб."],["Яйца (начинка)","2 шт"],["Молоко","150г"],["Укроп","пучок"],["Мисо паста","1 ст.л."],["Масло раст.","20г"],["Кефир","250г"],["Яйца (тесто)","2 шт"],["Масло сл.","50г"],["Соль","½ ч.л."],["Сахар","1 ч.л."],["Сода","1 ч.л."],["Мука","160г"]],
+["Капусту нашинкуйте, морковь натрите, лук+чеснок нарежьте. Яйца сварите вкрутую.","Обжарьте лук+морковь 5 мин, добавьте капусту+соль+перец+чеснок+мисо. Через 5 мин — молоко, накройте.","Выпарите жидкость, добавьте нарезанные яйца+укроп.","Тесто: масло растопите+кефир+яйца+соль+сахар+сода+мука — перемешайте.","В форму 22 см: ½ теста → начинка → ½ теста. Запекайте 40 мин при 190°C."]],
+
+["focaccia","baking","Фокачча без замеса","🫓","14 ч",8,1,"Хрустящая итальянская лепёшка на долгой холодной ферментации",
+[["Мука пшеничная","500г"],["Вода","420г"],["Дрожжи сухие быстродействующие","7.5г (или 12г свежих)"],["Соль","10г"],["Масло оливковое","30г + для смазки"],["Крупная соль","для топпинга"],["Топпинг","томаты/оливки/травы/песто"]],
+["Соедините муку+воду+дрожжи+соль (масло — без). Через 20 мин добавьте масло.","Накройте, 1.5–2 ч. Раз в 20 мин делайте складки (3 раза).","Смажьте контейнер, переложите тесто, накройте, холодильник 8–24 ч.","Выложите на смазанный противень, растяните, накройте, расстойка 1.5–2 ч.","Духовку нагрейте 190°C (15 мин). Полейте маслом, ямочки, крупная соль. Запекайте 25 мин.","Остудите на решётке."],
+"Нарежьте и заморозьте. Разогрейте при 160°C 7–8 мин."],
+
+["apple-pie","baking","Яблочный пирог","🍎","1.5 ч",8,1,"Песочный пирог с карамелизованными яблоками и специями",
+[["Масло сл. холодное","150г"],["Сахар","50г"],["Мука","250г"],["Вода холодная","50–70г"],["Яблоки","1 кг"],["Сахар (начинка)","60г"],["Вода (карамель)","20г"],["Крахмал","1 ч.л."],["Сок лимона","⅓ шт"],["Корица","1 ч.л."],["Кардамон","½ ч.л."],["Бадьян","⅓ звёздочки"]],
+["Масло разотрите с сахаром+мукой в крошку. Добавьте воду, соберите в комок. Разделите на 2 части. Холодильник 20 мин.","Яблоки нарежьте 2×2 см, полейте лимоном. Специи перемелите.","Сахар+вода до карамели, добавьте ⅔ яблок+специи, готовьте до средней мягкости.","Крахмал разведите водой, влейте в яблоки, добавьте свежие. Остудите.","Большую часть теста в форму (24–27 см), яблоки, накройте второй частью.","Холодильник 20 мин. Запекайте 40 мин при 180°C."],
+"Замораживайте готовым или сырым тестом."],
+
+["chia-pudding","desserts","Чиа пудинг","🫐","5 мин + 4 ч",4,0,"Йогурт с семенами чиа и фруктами — готовится за 5 минут",
+[["Йогурт греческий","300г"],["Молоко","100г"],["Семена чиа","4 ст.л."],["Подсластитель","0–20г"],["Бананы/манго/ягоды","по вкусу"],["Печенье или савоярди","по вкусу"]],
+["На дно баночки — печенье, сверху фрукты.","Смешайте йогурт+молоко+чиа+подсластитель. Вылейте на фруктовый слой.","Холодильник минимум 4 ч. Подавайте с гранолой или кокосовой стружкой."]],
+
+["blueberry-lemon-cake","baking","Кекс с голубикой и лимоном","🫐","1 ч",8,1,"Нежный кекс на йогурте с ягодами и хрустящим крамблом",
+[["Яйца","2 шт"],["Масло сл.","100г"],["Йогурт греческий","120г"],["Сахар","130г"],["Цедра лимона","1 шт"],["Сок лимона","½ шт"],["Мука","190г"],["Ягоды голубика/черника","150г"],["Разрыхлитель","1 ч.л."],["Сода","1 ч.л."],["Масло (крамбл)","20г"],["Сахар (крамбл)","20г"],["Мука (крамбл)","20г"]],
+["Крамбл: масло+мука+сахар в крошку. Холодильник.","Духовку нагрейте до 180°C. Масло растопите.","Яйца с сахаром взбейте, добавьте йогурт+масло+цедру+сок.","Мука+разрыхлитель+сода. Ягоды без сока. Выложите в форму, посыпьте крамблом.","Запекайте 50 мин до сухой зубочистки."],
+"Замораживайте нарезанным ломтиками."],
+
+["carrot-cheesecake-cookie","baking","Морковное печенье с чизкейком","🥕","1.5 ч",12,1,"Ароматное печенье со специями и замороженной творожной начинкой внутри",
+[["Масло сл. мягкое","150г"],["Мука","290г"],["Яйцо","1 шт"],["Сахар тростниковый","100г"],["Морковь тёртая","120г"],["Сода","1 ч.л."],["Соль","½ ч.л."],["Корица","6г"],["Кардамон","3г"],["Имбирь сухой","1г"],["Гвоздика+бадьян","по 1г"],["Творожный сыр","150г"],["Сахар (начинка)","30г"],["Крахмал","1 ч.л."]],
+["Начинка: сыр+сахар+крахмал пробейте блендером. Отсадите по ½ ст.л. на плёнку. Заморозьте 1 ч.","Тесто: масло+сахар+специи взбейте. Яйцо, морковь, мука+сода+соль.","На 11–12 частей, вложите замороженную начинку. Холодильник 20 мин.","Духовку нагрейте до 180°C. Запекайте 25 мин.","Хранить в контейнере в холодильнике."],
+"Заготовки теста без начинки — в морозилку."],
+];
+        
+        const CAT={
+  poultry:{label:"Птица",emoji:"🐔",bg:"#FFF3E0",accent:"#E65100"},
+  beef:{label:"Говядина & Свинина",emoji:"🥩",bg:"#FCE4EC",accent:"#880E4F"},
+  fish:{label:"Рыба",emoji:"🐟",bg:"#E3F2FD",accent:"#0D47A1"},
+  soups:{label:"Супы & Бульоны",emoji:"🍲",bg:"#F3E5F5",accent:"#4A148C"},
+  vegetarian:{label:"Вегетарианское",emoji:"🥦",bg:"#E8F5E9",accent:"#1B5E20"},
+  salads:{label:"Салаты & Гарниры",emoji:"🥗",bg:"#F1F8E9",accent:"#33691E"},
+  snacks:{label:"Закуски & Соусы",emoji:"🫙",bg:"#FFF8E1",accent:"#FF6F00"},
+  breakfast:{label:"Завтраки",emoji:"🌅",bg:"#FFFDE7",accent:"#F57F17"},
+  desserts:{label:"Десерты",emoji:"🍰",bg:"#F3E5F5",accent:"#6A1B9A"},
+  baking:{label:"Выпечка",emoji:"🥐",bg:"#FCE4EC",accent:"#AD1457"},
+};
+        
+        const THEORY=[
+  {id:"freezer",icon:"❄️",title:"Как разобрать морозилку",subtitle:"Правила ревизии и хранения",
+   content:[
+    {heading:"Принцип ревизии — 4 вопроса",list:["Я знаю, что это? → нет → в утиль","Я реально это съем? → нет → в утиль","Когда я это съем? → «когда-нибудь» → в утиль","Когда заморожено? → больше 4 мес → в утиль"]},
+    {heading:"Главное правило",tip:"Замораживаем не остатки, а полуфабрикаты или готовые блюда с понятной судьбой."},
+    {heading:"Подпись на каждом пакете",list:["Что это (название)","Дата заморозки","Срок годности"]},
+   ],
+   table:[{Продукт:"Мясо (куски)",Срок:"6–12 мес"},{Продукт:"Птица",Срок:"6–9 мес"},{Продукт:"Рыба",Срок:"3–6 мес"},{Продукт:"Фарш",Срок:"3–4 мес"},{Продукт:"Готовые блюда",Срок:"2–6 мес"},{Продукт:"Бульоны",Срок:"4–6 мес"}]},
+
+  {id:"safety",icon:"🌡️",title:"Пищевая безопасность",subtitle:"Сроки хранения и правильное охлаждение",
+   content:[
+    {heading:"Сроки в холодильнике (+0…+4°C)",list:["Птица и фарш: 2 дня","Рыба: 2 дня","Мясо куском: 3–5 дней","Готовые блюда: 3–4 дня","Крупы: 3–4 дня","Салаты с заправкой: сутки"]},
+    {heading:"Как охлаждать",list:["Слой ≤ 3–4 см в неглубоком контейнере","Большие объёмы — ледяная баня","Не ставьте горячее прямо в холодильник"]},
+    {heading:"Правило ротации",tip:"Новые ёмкости вглубь, старые вперёд. Подписывайте всё: что + до какого дня."},
+   ]},
+
+  {id:"vacuum",icon:"🔒",title:"Вакуумация",subtitle:"Как увеличить срок хранения вдвое",
+   content:[
+    {heading:"Главные правила",list:["Не вакуумируйте жидкости — сначала заморозьте","Оставляйте 5–7 см края","Следите за чистотой края пакета"]},
+    {heading:"Важно",tip:"Вакуум не убивает бактерии. Молочные кремы и яйца — не дольше 2–3 дней."},
+   ],
+   table:[{Продукт:"Супы, бульоны",Срок:"6–8 дней"},{Продукт:"Гарниры",Срок:"5–7 дней"},{Продукт:"Мясо, птица",Срок:"6–8 дней"},{Продукт:"Тушёные блюда",Срок:"7–9 дней"},{Продукт:"Соусы",Срок:"7–8 дней"},{Продукт:"Рыба готовая",Срок:"5 дней"}]},
+
+  {id:"sousvide",icon:"♨️",title:"Су-вид",subtitle:"Приготовление под вакуумом при низкой температуре",
+   content:[
+    {heading:"Что такое су-вид",text:"Продукты в вакуумных пакетах готовятся при точной температуре на водяной бане. Результат невозможно получить обычными методами."},
+    {heading:"Преимущества",list:["Стабильный результат каждый раз","Сохранение витаминов","Хранение до 8–10 дней в запаянном пакете","Меньше потерь влаги"]},
+    {heading:"Куриная грудка",tip:"Маринуйте → вакуумируйте → 67°C 1.5 ч → ледяная вода 5 мин → холодильник. Перед подачей — быстро обжарьте."},
+   ]},
+
+  {id:"grains",icon:"🌾",title:"Варка круп",subtitle:"Пропорции, время, советы",
+   content:[{heading:"Правила",list:["Заливайте кипятком","Соль — в начале","Масло — после варки","Настаивайте под крышкой 10–15 мин"]}],
+   table:[{Крупа:"Рис (басмати)",Пропорция:"1:1.7",Время:"15–17 мин"},{Крупа:"Гречка",Пропорция:"1:2",Время:"20–25 мин"},{Крупа:"Киноа",Пропорция:"1:2",Время:"15–17 мин"},{Крупа:"Кускус",Пропорция:"1:2 кипяток",Время:"10 мин"},{Крупа:"Булгур",Пропорция:"1:2",Время:"15–17 мин"}]},
+
+  {id:"sauces",icon:"🫙",title:"Гид по соусам",subtitle:"Азиатские и базовые соусы",
+   content:[
+    {heading:"Мисо паста",text:"Ферментированная паста из соевых бобов. Умами, солёный. В супы, маринады, соусы.",tip:"Начните с белой — она мягче."},
+    {heading:"Соевый соус",text:"Ищите «натуральное брожение». Состав: соевые бобы, пшеница, вода, соль."},
+    {heading:"Тхина",text:"Паста из кунжута. Перед использованием размешайте. Выбирайте жидкую и светлую."},
+    {heading:"Шрирача",text:"Остро-сладкий. В лапшу, яйца, рамен. Отлично с мёдом+соевым."},
+    {heading:"Базовый соус боула",list:["3 ст.л. тхина + 3 ст.л. соевый + 1 ч.л. мёд + 1 ч.л. имбирь + 2 ст.л. лимон + вода"]},
+   ]},
+
+  {id:"formats",icon:"📅",title:"Форматы заготовок",subtitle:"Выберите подходящий стиль",
+   content:[
+    {heading:"А. Один день раз в 2 недели",text:"Меню → закупка → готовите партиями → замораживаете. В будни только разогреваете.",tip:"Нужно 2 свободных ящика в морозилке."},
+    {heading:"Б. Готовлю в 3 раза больше",text:"Ежедневно готовите ×3. Лишнее — в морозилку. К концу недели — дубли на следующую."},
+    {heading:"В. 3 часа каждую неделю",text:"Раз в неделю 3 часа заготовок. Постепенно накапливается запас."},
+    {heading:"Г. По категориям без меню",tip:"Партиями: птица→рыба→фарш→завтраки→овощи. В будни миксуете: белок+гарнир+овощи+соус."},
+   ]},
+
+  {id:"bowls",icon:"🥗",title:"Конструктор боулов",subtitle:"Формула сытного блюда из заготовок",
+   content:[
+    {heading:"Формула",text:"Основа + Белок + 2–4 вида овощей + Соус + Хруст"},
+    {heading:"Основа",list:["Киноа, булгур, рис, гречка, кускус, паста, соба"]},
+    {heading:"Белок",list:["Животный: курица, рыба, говядина, яйца","Растительный: тофу, нут, чечевица, фасоль"]},
+    {heading:"6 базовых соусов",list:["Тхина+соевый+мёд+имбирь+лимон","Йогурт+тхина+чеснок+лимон","Медово-горчичный","Дзадзики: йогурт+укроп+чеснок","Азиатский: кунжутное+уксус+соевый+мёд","Ромеско: перец+миндаль+уксус+чеснок"]},
+    {heading:"Хруст",list:["Орехи, семечки, кунжут, маринованный лук, зелень"]},
+   ]},
+  {id:"olive-oil",icon:"🫒",title:"Оливковое масло extra virgin",subtitle:"Как выбирать и чем отличается",
+   content:[
+    {heading:"Что такое Extra Virgin",text:"Самый качественный вид оливкового масла — только механический отжим, без химии и высоких температур."},
+    {heading:"По региону",list:["Италия — яркий, пряный, слегка горьковатый","Испания — мягкое, фруктовое, для жарки","Греция — насыщенное, травянистое или ореховое","Тунис, Португалия — качественные, дешевле"]},
+    {heading:"Как выбирать",list:["Надпись Extra Virgin Olive Oil на упаковке","Тёмная стеклянная бутылка — свет разрушает пользу","Дата сбора урожая — лучше всего 12–18 мес от сбора","Сертификаты: DOP, PDO, BIO, Organic, PGI"]},
+    {heading:"Избегайте",list:["Расплывчатой маркировки","Подозрительно низких цен","Прозрачной упаковки или пластика"]},
+    {heading:"Вкус и аромат",list:["Фруктовое (fruttato) — спелые или зелёные фрукты","Горькое (amaro) — высокие антиоксиданты, это хорошо","Острое (piccante) — «щиплет» в горле — много полифенолов"]},
+   ]},
+
+  {id:"vinegar",icon:"🧪",title:"Гид по уксусам",subtitle:"Виды, применение и как выбрать для салата",
+   content:[
+    {heading:"Зачем нужен уксус в кулинарии",list:["Добавляет кислоту и баланс вкуса","Уравновешивает жирность масел","Усиливает вкус других ингредиентов","Смягчает текстуру овощей (лук, капуста)","Выступает консервантом"]},
+    {heading:"Виды уксусов",list:["Столовый 9% — резкий, агрессивный, для маринадов","Яблочный — мягкий, фруктовый, для салатов и заправок","Винный красный/белый — мягкий, винный, средиземноморская кухня","Бальзамический — сладковато-кислый, густой, для сыра и ягод","Рисовый — мягкий, слегка сладкий, азиатская кухня","Ароматизированный — с травами/ягодами, ресторанная кухня"]},
+    {heading:"Как выбрать для салата",list:["5–6% кислотность — идеально для заправок","Бальзамик: ищите IGP/DOP/Modena на этикетке","Винный: Франция, Испания, Италия","Натуральный состав — без ароматизаторов и Е-добавок"]},
+    {tip:"Лучшие бренды: KATZ, Unio (Испания)."},
+   ]},
+
+  {id:"plate-method",icon:"🍽️",title:"Метод тарелки",subtitle:"Как сбалансировать питание без подсчёта калорий",
+   content:[
+    {heading:"Формула",text:"½ тарелки — овощи, ¼ — белок, ¼ — углеводы. Жиры — оливковое масло, орехи, авокадо."},
+    {heading:"Овощи (½ тарелки)",list:["Салат, капуста, помидор, огурец, морковь","Кабачок, баклажан, редис, болгарский перец","Тыква, авокадо, сельдерей, зелень"]},
+    {heading:"Белок (¼ тарелки)",list:["Рыба, морепродукты, птица, мясо","Яйца, бобовые (нут, фасоль, чечевица, тофу)"]},
+    {heading:"Углеводы (¼ тарелки)",list:["Пшено, булгур, киноа, бурый рис","Макароны из твёрдых сортов, картофель","Батат, цельнозерновой хлеб"]},
+   ]},
+
+  {id:"storage-rules",icon:"📦",title:"Правила хранения готовой еды",subtitle:"Охлаждение, контейнеры и пищевая безопасность",
+   content:[
+    {heading:"Правила охлаждения",list:["Готовая еда — не более часа на столе","Через час: мясо отдельно, овощи отдельно, крупы отдельно — в холодильник"]},
+    {heading:"Правила хранения",list:["Температура холодильника — не выше 4°C","Готовые крупы, мясо, рыба — 3–4 дня, разогреваем только один раз","Салат с заправкой — 1 сутки"]},
+    {heading:"В чём хранить",list:["Идеально — стеклянные прямоугольные контейнеры до 700 мл (можно разогревать)","Приемлемо — плотный пластик, мойте без пахучего средства"]},
+    {heading:"Пищевая безопасность",list:["Не остужайте еду на столе до холодного состояния","Обязательно хорошо разогревайте мясо и рыбу на 4-й день","Подписывайте контейнер: что внутри и до какого дня"]},
+    {tip:"Удобно подписывать бумажным скотчем."},
+   ]},
+
+  {id:"bird-roasting",icon:"🍗",title:"Инструкция по запеканию птицы",subtitle:"Курица, индейка, утка, петух — температуры и время",
+   content:[
+    {heading:"Солевой раствор 4%",text:"1 л воды + 40 г соли + 1 ст.л. сахара + горсть перца + цедра лимона + травы. Держать птицу 4–24 часа."},
+    {heading:"Курица",list:["Солевой раствор 4–24 ч","Маринад 4–24 ч","180°C, 40 мин под фольгой на решётке, потом 15–20 мин без","T° внутри бедра 75–80°C","Отдых 15 мин"]},
+    {heading:"Индейка",list:["Надрезать кожу","Солевой раствор 4–24 ч","Маринад 4–24 ч (можно нашпиговать маслом с травами под кожу)","140°C, 3.5–4 ч под фольгой, потом 20–30 мин при 200°C","T° внутри бедра 75–80°C"]},
+    {heading:"Утка",list:["Солевой раствор 4–24 ч","Маринад 4–24 ч","140°C, 2–2.5 ч в форме с бульоном, потом 15–25 мин при 200°C","T° внутри бедра 72–75°C"]},
+    {heading:"Азиатский маринад",list:["4 ст.л. мёда + 2 ст.л. масла + 6 зуб. чеснока + 3 ст.л. имбиря + 3 ч.л. 5 специй + 5 ст.л. соевого + 3 ст.л. сока лимона"]},
+    {heading:"Медово-горчичный маринад",list:["2 ст.л. мёда + 1.5 ст.л. горчицы + 3 ст.л. соевого + 5 зуб. чеснока + 2 ст.л. масла + 2 ч.л. паприки"]},
+   ]},
+  {id:"yeast-dough",icon:"🍞",title:"Дрожжевое тесто",subtitle:"Этапы, ошибки и как работать с глютеном",
+   content:[
+    {heading:"Состав",text:"Мука + вода/молоко + дрожжи + соль + немного сахара. Сдобное тесто: то же самое + сливочное масло + больше сахара."},
+    {heading:"Вода и молоко",tip:"Должны быть холодными или комнатной температуры. Тёплая жидкость убивает дрожжи."},
+    {heading:"Мука",list:["Белок на упаковке — 12–13г. Это важно.","Мука с низким белком даёт слабую структуру","Одна мука может «впитывать» жидкость по-разному — тестируйте на практике","Срок годности должен быть действительным"]},
+    {heading:"Виды дрожжей",list:["Свежие (прессованные) — быстро работают, срок до 2 недель","Сухие активные — сначала растворите в тёплой воде с 1 ч.л. сахара на 10 мин","Сухие быстродействующие (инстантные) — добавляйте прямо в муку","Соотношение: 1г сухих = 3г свежих. Все открытые сухие — хранить в морозилке."]},
+    {heading:"6 этапов",list:["1. Замес теста","2. Расстойка 1 (до увеличения вдвое, идеально при 22–26°C)","3. Холодная ферментация (опц.) — в холодильник до суток","4. Формовка","5. Расстойка 2 (снова вдвое-втрое)","6. Выпечка (~25–35 мин)"]},
+    {heading:"Глютеновое окно",text:"Возьмите кусочек теста и аккуратно растяните. Если тянется в тонкую плёнку без разрывов — глютен развит хорошо, можно добавлять масло.",tip:"Масло вводится ТОЛЬКО после хорошего замеса. Раннее добавление масла мешает развитию глютена."},
+    {heading:"Типичные ошибки",list:["Слишком тёплая жидкость → дрожжи погибают","Слабая мука → тесто 'плывёт'","Мука после замеса → разрушает глютен","Масло слишком рано → глютен не развивается","Расстойка у батареи → тесто перекисает","Не накрыли тесто → засохла корочка"]},
+   ]},
+];
+        
+        // ═══════════════════════════════════════════════════════════
+        // INITIALIZE DATA
+        // ═══════════════════════════════════════════════════════════
+        
+        const RECIPES = RD.map(([id, cat, title, emoji, time, portions, freezable, desc, ingredients, steps, freezeTip]) => ({
+            id, cat, title, emoji, time, portions, freezable: Boolean(freezable), desc, freezeTip,
+            ingredients: ingredients.map(([name, amount]) => ({name, amount})),
+            steps
+        }));
+        
+        // ═══════════════════════════════════════════════════════════
+        // UTILITY FUNCTIONS
+        // ═══════════════════════════════════════════════════════════
+        
+        function scaleAmt(amount, basePortion, currentPortion) {
+            const num = parseFloat(amount);
+            if (isNaN(num)) return amount;
+            const scaled = (num / basePortion) * currentPortion;
+            return scaled % 1 === 0 ? Math.round(scaled).toString() : scaled.toFixed(1);
         }
-      });
-
-      // Hide all views
-      document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-
-      // Show selected view
-      switch (viewName) {
-        case 'recipes':
-          document.getElementById('recipesView').classList.remove('hidden');
-          document.getElementById('pageTitle').textContent = 'Рецепты';
-          renderRecipes();
-          break;
-        case 'meal-plan':
-          document.getElementById('mealPlanView').classList.remove('hidden');
-          document.getElementById('pageTitle').textContent = 'План недели';
-          break;
-        case 'groceries':
-          document.getElementById('groceriesView').classList.remove('hidden');
-          document.getElementById('pageTitle').textContent = 'Покупки';
-          break;
-        case 'favorites':
-          document.getElementById('favoritesView').classList.remove('hidden');
-          document.getElementById('pageTitle').textContent = 'Избранное';
-          break;
-      }
-    }
-
-    function renderRecipes() {
-      const filtered = recipes.filter(r => 
-        r.title.toLowerCase().includes(state.searchTerm) ||
-        r.desc.toLowerCase().includes(state.searchTerm)
-      );
-
-      const grid = document.getElementById('recipeGrid');
-      grid.innerHTML = filtered.map(recipe => `
-        <div class="card" onclick="showRecipe('${recipe.id}')">
-          <div class="card-hero">${recipe.emoji}</div>
-          <div class="card-body">
-            <h3>${recipe.title}</h3>
-            <p>${recipe.desc}</p>
-            <div class="tags">
-              <span class="tag t-time">⏱ ${recipe.time}</span>
-              <span class="tag t-port">👥 ${recipe.portions}</span>
-              ${recipe.freeze ? '<span class="tag t-freeze">❄️ Заморозка</span>' : ''}
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function showRecipe(id) {
-      const recipe = recipes.find(r => r.id === id);
-      if (!recipe) return;
-
-      state.selectedRecipe = recipe;
-      const view = document.getElementById('detailView');
-      
-      view.innerHTML = `
-        <div class="content">
-          <div class="back" onclick="switchView('recipes')">← Назад</div>
-          <div class="detail-hero">
-            <div class="emoji">${recipe.emoji}</div>
-            <div>
-              <h1>${recipe.title}</h1>
-              <p>${recipe.desc}</p>
-              <div class="tags" style="margin-top: 10px;">
-                <span class="tag t-time">⏱ ${recipe.time}</span>
-                <span class="tag t-port">👥 ${recipe.portions}</span>
-                ${recipe.freeze ? '<span class="tag t-freeze">❄️ Заморозка</span>' : ''}
-              </div>
-            </div>
-          </div>
-
-          <div class="detail-grid">
-            <div class="box">
-              <h4>Ингредиенты</h4>
-              ${recipe.ingredients.map(([name, amt]) => `
-                <div class="ing-row">
-                  <span>${name}</span>
-                  <span class="amt">${amt}</span>
+        
+        function weeklyGroceries(plan) {
+            const groceries = {};
+            Object.values(plan).forEach(mealId => {
+                if (!mealId) return;
+                const recipe = RECIPES.find(r => r.id === mealId);
+                if (recipe) {
+                    recipe.ingredients.forEach(ing => {
+                        if (!groceries[ing.name]) groceries[ing.name] = [];
+                        groceries[ing.name].push(ing.amount);
+                    });
+                }
+            });
+            return groceries;
+        }
+        
+        // ═══════════════════════════════════════════════════════════
+        // STATE & STORAGE
+        // ═══════════════════════════════════════════════════════════
+        
+        const state = {
+            page: 'home',
+            search: '',
+            selected: null,
+            theorySelected: null,
+            portions: parseInt(localStorage.getItem('portions') || '4'),
+            favorites: JSON.parse(localStorage.getItem('favorites') || '[]'),
+            checked: JSON.parse(localStorage.getItem('checked') || '{}'),
+            plan: JSON.parse(localStorage.getItem('plan') || '{}')
+        };
+        
+        function saveState() {
+            localStorage.setItem('portions', state.portions.toString());
+            localStorage.setItem('favorites', JSON.stringify(state.favorites));
+            localStorage.setItem('checked', JSON.stringify(state.checked));
+            localStorage.setItem('plan', JSON.stringify(state.plan));
+        }
+        
+        function navigate(page) {
+            state.page = page;
+            state.selected = null;
+            state.theorySelected = null;
+            state.search = '';
+            render();
+        }
+        
+        function setSelected(recipe) {
+            state.selected = recipe;
+            render();
+        }
+        
+        function setTheorySelected(theory) {
+            state.theorySelected = theory;
+            render();
+        }
+        
+        function toggleFavorite(recipeId) {
+            const idx = state.favorites.indexOf(recipeId);
+            if (idx > -1) state.favorites.splice(idx, 1);
+            else state.favorites.push(recipeId);
+            saveState();
+            render();
+        }
+        
+        function updatePortions(newPortions) {
+            state.portions = Math.max(1, newPortions);
+            saveState();
+            render();
+        }
+        
+        function updateSearch(query) {
+            state.search = query;
+            render();
+        }
+        
+        function toggleCheck(key) {
+            state.checked[key] = !state.checked[key];
+            saveState();
+            render();
+        }
+        
+        function goBack() {
+            state.selected = null;
+            state.theorySelected = null;
+            render();
+        }
+        
+        // ═══════════════════════════════════════════════════════════
+        // RENDER FUNCTION
+        // ═══════════════════════════════════════════════════════════
+        
+        function render() {
+            const root = document.getElementById('root');
+            
+            let html = '<div class="app"><aside class="sidebar"><div class="logo"><h1>Моя <span>Кухня</span></h1><p>Книга рецептов</p></div>';
+            
+            // Navigation items
+            const NAV = [
+                {id:"home",icon:"🏠",label:"Главная"},
+                {section:"Рецепты"},
+                {id:"poultry",icon:"🐔",label:"Птица"},
+                {id:"beef",icon:"🥩",label:"Говядина & Свинина"},
+                {id:"fish",icon:"🐟",label:"Рыба"},
+                {id:"soups",icon:"🍲",label:"Супы & Бульоны"},
+                {id:"vegetarian",icon:"🥦",label:"Вегетарианское"},
+                {id:"salads",icon:"🥗",label:"Салаты & Гарниры"},
+                {id:"snacks",icon:"🫙",label:"Закуски & Соусы"},
+                {id:"breakfast",icon:"🌅",label:"Завтраки"},
+                {id:"desserts",icon:"🍰",label:"Десерты"},
+                {id:"baking",icon:"🥐",label:"Выпечка"},
+                {section:"Знания"},
+                {id:"theory",icon:"📖",label:"Теория кухни"},
+                {section:"Планирование"},
+                {id:"planner",icon:"📅",label:"Недельный план"},
+                {section:""},
+                {id:"favorites",icon:"❤️",label:"Избранное"},
+            ];
+            
+            NAV.forEach(item => {
+                if (item.section !== undefined) {
+                    html += item.section 
+                        ? `<div class="sec-title">${item.section}</div>`
+                        : '<div style="height:6px"></div>';
+                } else {
+                    const active = state.page === item.id && !state.selected && !state.theorySelected ? ' active' : '';
+                    const badge = item.id === 'favorites' && state.favorites.length > 0 
+                        ? `<span class="badge" style="margin-left:auto">${state.favorites.length}</span>`
+                        : '';
+                    html += `<div class="nav-item${active}" onclick="navigate('${item.id}')">
+                        <span class="ni">${item.icon}</span>${item.label}${badge}
+                    </div>`;
+                }
+            });
+            
+            // Determine header
+            let title = 'Моя Кухня';
+            let subtitle = 'Рецепты, теория и планировщик';
+            
+            if (state.selected) {
+                title = state.selected.title;
+                subtitle = CAT[state.selected.cat]?.label || '';
+            } else if (state.theorySelected) {
+                title = state.theorySelected.title;
+                subtitle = state.theorySelected.subtitle || '';
+            } else if (state.page === 'theory') {
+                title = 'Теория кухни';
+                subtitle = `${THEORY.length} разделов`;
+            } else if (state.page === 'planner') {
+                title = 'Недельный план';
+                subtitle = 'Обед + ужин · 7 дней · список покупок';
+            } else if (state.page === 'favorites') {
+                title = 'Избранное';
+                subtitle = `${state.favorites.length} рецептов`;
+            } else if (CAT[state.page]) {
+                title = CAT[state.page].label;
+                subtitle = `${RECIPES.filter(r => r.cat === state.page).length} рецептов`;
+            }
+            
+            html += '</aside><main class="main"><div class="header"><div class="header-left"><h2>' + title + '</h2><p>' + subtitle + '</p></div>';
+            
+            // Search and portions controls
+            if (!state.selected && !state.theorySelected && state.page !== 'planner') {
+                html += `<div class="search"><span>🔍</span><input type="text" placeholder="Поиск..." value="${state.search}" oninput="updateSearch(this.value)"/></div>`;
+                html += `<div class="portions-row"><span style="color:var(--muted)">👥</span>
+                    <button class="scale-btn" style="width:22px;height:22px;font-size:13px" onclick="updatePortions(${state.portions} - 1)">−</button>
+                    <strong>${state.portions}</strong>
+                    <button class="scale-btn" style="width:22px;height:22px;font-size:13px" onclick="updatePortions(${state.portions} + 1)">+</button>
+                </div>`;
+            }
+            
+            html += '</div><div class="content">';
+            
+            // HOME
+            if (state.page === 'home' && !state.selected) {
+                html += '<div class="grid2" style="margin-bottom:20px">';
+                Object.entries(CAT).forEach(([catId, cat]) => {
+                    const count = RECIPES.filter(r => r.cat === catId).length;
+                    html += `<div class="cat-card" style="background:${cat.bg};border-color:${cat.accent}33" onclick="navigate('${catId}')">
+                        <div class="ce">${cat.emoji}</div><h3 style="color:${cat.accent}">${cat.label}</h3><p>${count} рецептов</p></div>`;
+                });
+                html += '</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">';
+                html += `<div style="background:var(--ink);color:var(--cream);border-radius:var(--r);padding:20px;cursor:pointer" onclick="navigate('theory')">
+                    <div style="font-size:28px;margin-bottom:7px">📖</div>
+                    <div style="font-family:'Playfair Display',serif;font-size:16px;margin-bottom:3px">Теория кухни</div>
+                    <div style="font-size:11px;opacity:.6">${THEORY.length} разделов</div>
                 </div>
-              `).join('')}
-            </div>
-
-            <div class="box">
-              <h4>Пошагово</h4>
-              ${recipe.steps.map((step, i) => `
-                <div class="step">
-                  <div class="step-n">${i + 1}</div>
-                  <p>${step}</p>
-                </div>
-              `).join('')}
-            </div>
-
-            ${recipe.freezeTip ? `
-              <div class="box full" style="background: #E3F2FD; border-color: #90CAF9;">
-                <h4>Как заморозить</h4>
-                <p>${recipe.freezeTip}</p>
-              </div>
-            ` : ''}
-          </div>
-        </div>
-      `;
-
-      document.getElementById('recipesView').classList.add('hidden');
-      document.getElementById('mealPlanView').classList.add('hidden');
-      document.getElementById('groceriesView').classList.add('hidden');
-      document.getElementById('favoritesView').classList.add('hidden');
-      document.getElementById('detailView').classList.remove('hidden');
-      document.getElementById('pageTitle').textContent = recipe.title;
-    }
-
-    // Start app
-    init();
-  </script>
+                <div style="background:var(--accent);color:#fff;border-radius:var(--r);padding:20px;cursor:pointer" onclick="navigate('planner')">
+                    <div style="font-size:28px;margin-bottom:7px">📅</div>
+                    <div style="font-family:'Playfair Display',serif;font-size:16px;margin-bottom:3px">Недельный план</div>
+                    <div style="font-size:11px;opacity:.8">Обед + ужин + список покупок</div>
+                </div></div>`;
+            }
+            
+            // RECIPE LIST
+            const isCat = CAT[state.page];
+            const filteredRecipes = isCat 
+                ? RECIPES.filter(r => r.cat === state.page && (!state.search || r.title.toLowerCase().includes(state.search.toLowerCase())))
+                : state.page === 'favorites'
+                ? RECIPES.filter(r => state.favorites.includes(r.id))
+                : [];
+            
+            if ((isCat || state.page === 'favorites') && !state.selected) {
+                if (filteredRecipes.length) {
+                    html += '<div class="grid">';
+                    filteredRecipes.forEach(recipe => {
+                        const isFav = state.favorites.includes(recipe.id);
+                        html += `<div class="card" onclick="setSelected(RECIPES.find(r => r.id==='${recipe.id}'))">
+                            <div class="card-hero" style="position:relative">
+                                <span style="font-size:42px">${recipe.emoji}</span>
+                                <button class="fav-btn" onclick="event.stopPropagation(); toggleFavorite('${recipe.id}')">${isFav ? '❤️' : '🤍'}</button>
+                            </div>
+                            <div class="card-body">
+                                <h3>${recipe.title}</h3>
+                                <p>${recipe.desc}</p>
+                                <div class="tags">
+                                    <span class="tag t-time">⏱ ${recipe.time}</span>
+                                    <span class="tag t-port">👥 ${recipe.portions}</span>
+                                    ${recipe.freezable ? '<span class="tag t-freeze">❄️ Заморозка</span>' : ''}
+                                </div>
+                            </div>
+                        </div>`;
+                    });
+                    html += '</div>';
+                } else {
+                    html += `<div class="empty"><div class="ei">${state.page === 'favorites' ? '❤️' : '🔍'}</div>
+                        <h3>${state.page === 'favorites' ? 'Нет избранных' : 'Рецепты не найдены'}</h3>
+                        <p>${state.page === 'favorites' ? 'Нажмите 🤍' : 'Попробуйте изменить запрос'}</p></div>`;
+                }
+            }
+            
+            // RECIPE DETAIL
+            if (state.selected) {
+                const sel = state.selected;
+                const isFav = state.favorites.includes(sel.id);
+                html += `<div style="max-width:760px"><div class="back" onclick="goBack()">← Назад</div>
+                    <div class="detail-hero">
+                        <div class="emoji">${sel.emoji}</div>
+                        <div>
+                            <h1>${sel.title}</h1><p>${sel.desc}</p>
+                            <div class="meta-row">
+                                <span class="meta-chip">⏱ ${sel.time}</span>
+                                <span class="meta-chip">👥 ${sel.portions} порций</span>
+                                ${sel.freezable ? '<span class="meta-chip">❄️ Можно заморозить</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="scale-row">
+                        <span style="color:var(--muted)">Порции:</span>
+                        <button class="scale-btn" onclick="updatePortions(${state.portions} - 1)">−</button>
+                        <strong>${state.portions}</strong>
+                        <button class="scale-btn" onclick="updatePortions(${state.portions} + 1)">+</button>
+                        ${state.portions !== sel.portions ? `<span style="font-size:11px;color:var(--muted)">базово: ${sel.portions}</span>` : ''}
+                    </div>
+                    <div class="detail-grid">
+                        <div class="box"><h4>🛒 Ингредиенты</h4>`;
+                sel.ingredients.forEach((ing, i) => {
+                    const scaled = scaleAmt(ing.amount, sel.portions, state.portions);
+                    html += `<div class="ing-row"><span>${ing.name}</span><span class="amt">${scaled}</span></div>`;
+                });
+                html += `</div><div class="box" style="background:var(--warm)"><h4>💡 Заметки</h4>`;
+                if (sel.freezable) html += `<div class="freeze-box">❄️ ${sel.freezeTip}</div>`;
+                html += `<div style="font-size:12px;color:var(--muted);line-height:1.7">
+                    <div>⏱ ${sel.time}</div>
+                    <div style="margin-top:3px">👥 Базово: ${sel.portions} порций</div>
+                    ${sel.freezable ? '<div style="margin-top:3px">🗃️ В морозилке до 6 мес</div>' : ''}
+                </div></div>
+                <div class="box full"><h4>👨‍🍳 Приготовление</h4>`;
+                sel.steps.forEach((step, i) => {
+                    html += `<div class="step"><div class="step-n">${i + 1}</div><p>${step}</p></div>`;
+                });
+                html += `</div></div><div class="grocery-panel"><h4>🛒 Список покупок</h4>`;
+                sel.ingredients.forEach((ing, i) => {
+                    const key = `${sel.id}-${i}`;
+                    const isChecked = state.checked[key];
+                    const scaled = scaleAmt(ing.amount, sel.portions, state.portions);
+                    html += `<div class="g-row">
+                        <div class="g-check${isChecked ? ' on' : ''}" onclick="toggleCheck('${key}')"></div>
+                        <span style="text-decoration:${isChecked ? 'line-through' : 'none'};opacity:${isChecked ? '.5' : '1'}">${ing.name} — ${scaled}</span>
+                    </div>`;
+                });
+                html += `</div></div>`;
+            }
+            
+            // THEORY
+            if (state.page === 'theory' && !state.theorySelected) {
+                html += '<div class="grid2">';
+                THEORY.forEach(t => {
+                    html += `<div class="theory-card" onclick="setTheorySelected(THEORY.find(th => th.id==='${t.id}'))">
+                        <div class="ti">${t.icon}</div><h3>${t.title}</h3><p>${t.subtitle}</p></div>`;
+                });
+                html += '</div>';
+            }
+            
+            if (state.theorySelected) {
+                const t = state.theorySelected;
+                html += `<div class="back" onclick="goBack()">← Назад</div>
+                    <div class="t-section"><h3>${t.title}</h3>${t.content}</div>`;
+            }
+            
+            html += '</div></main></div>';
+            root.innerHTML = html;
+        }
+        
+        // Initial render
+        render();
+    </script>
 </body>
 </html>
