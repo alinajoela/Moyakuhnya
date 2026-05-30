@@ -1041,9 +1041,13 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
             render();
         }
         
+        let searchTimeout;
         function updateSearch(query) {
             state.search = query;
-            render();
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                render();
+            }, 150);
         }
         
         function toggleCheck(key) {
@@ -1133,7 +1137,7 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
             
             // Search and portions controls
             if (!state.selected && !state.theorySelected && state.page !== 'planner') {
-                html += `<div class="search"><span>🔍</span><input type="text" placeholder="Поиск..." value="${state.search}" oninput="updateSearch(this.value)" onkeyup="updateSearch(this.value)"/></div>`;
+                html += `<div class="search"><span>🔍</span><input type="text" placeholder="Поиск..." value="${state.search}" oninput="updateSearch(this.value)"/></div>`;
                 html += `<div class="portions-row"><span style="color:var(--muted)">👥</span>
                     <button class="scale-btn" style="width:22px;height:22px;font-size:13px" onclick="updatePortions(${state.portions} - 1)">−</button>
                     <strong>${state.portions}</strong>
