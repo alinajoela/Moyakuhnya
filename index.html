@@ -88,9 +88,14 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
 .theory-card p{font-size:12px;color:var(--muted)}
 .t-section{background:var(--white);border-radius:var(--r);padding:var(--pad);margin-bottom:12px;border:1px solid var(--border)}
 .t-section h3{font-family:'Playfair Display',serif;font-size:16px;margin-bottom:10px;color:var(--accent)}
+.t-section h4{font-size:14px;font-weight:600;color:var(--ink);margin-top:14px;margin-bottom:8px}
 .t-section p,.t-section li{font-size:13px;line-height:1.8}
 .t-section ul{padding-left:15px}
 .t-section li{margin-bottom:3px}
+.tip-box{background:#FFF3E0;border-left:3px solid var(--accent);padding:10px 12px;margin:10px 0;border-radius:3px;font-size:13px;line-height:1.6}
+.theory-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px}
+.theory-table th{background:var(--warm);padding:8px 10px;text-align:left;font-weight:600;color:var(--ink)}
+.theory-table td{padding:8px 10px;border-bottom:1px solid var(--border)}
 .tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
 .tbl th{background:var(--warm);padding:7px 10px;text-align:left;font-weight:600}
 .tbl td{padding:7px 10px;border-bottom:1px solid var(--warm)}
@@ -1026,7 +1031,52 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
             state.theorySelected = theory;
             render();
         }
-        
+
+        function renderTheoryContent(contentArray, tableArray) {
+            let html = '';
+
+            if (contentArray && Array.isArray(contentArray)) {
+                for (const item of contentArray) {
+                    if (item.heading) {
+                        html += `<h4>${item.heading}</h4>`;
+                        if (item.list && Array.isArray(item.list)) {
+                            html += '<ul>';
+                            for (const listItem of item.list) {
+                                html += `<li>${listItem}</li>`;
+                            }
+                            html += '</ul>';
+                        }
+                        if (item.text) {
+                            html += `<p>${item.text}</p>`;
+                        }
+                        if (item.tip) {
+                            html += `<div class="tip-box">💡 ${item.tip}</div>`;
+                        }
+                    }
+                }
+            }
+
+            if (tableArray && Array.isArray(tableArray) && tableArray.length > 0) {
+                html += '<table class="theory-table">';
+                const headers = Object.keys(tableArray[0]);
+                html += '<thead><tr>';
+                for (const header of headers) {
+                    html += `<th>${header}</th>`;
+                }
+                html += '</tr></thead><tbody>';
+                for (const row of tableArray) {
+                    html += '<tr>';
+                    for (const header of headers) {
+                        html += `<td>${row[header]}</td>`;
+                    }
+                    html += '</tr>';
+                }
+                html += '</tbody></table>';
+            }
+
+            return html;
+        }
+
         function toggleFavorite(recipeId) {
             const idx = state.favorites.indexOf(recipeId);
             if (idx > -1) state.favorites.splice(idx, 1);
@@ -1251,54 +1301,4 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
                     const isChecked = state.checked[key];
                     const scaled = scaleAmt(ing.amount, sel.portions, state.portions);
                     html += `<div class="g-row">
-                        <div class="g-check${isChecked ? ' on' : ''}" onclick="toggleCheck('${key}')"></div>
-                        <span style="text-decoration:${isChecked ? 'line-through' : 'none'};opacity:${isChecked ? '.5' : '1'}">${ing.name} — ${scaled}</span>
-                    </div>`;
-                });
-                html += `</div></div>`;
-            }
-            
-            // THEORY
-            if (state.page === 'theory' && !state.theorySelected) {
-                html += '<div class="grid2">';
-                THEORY.forEach(t => {
-                    html += `<div class="theory-card" onclick="setTheorySelected(THEORY.find(th => th.id==='${t.id}'))">
-                        <div class="ti">${t.icon}</div><h3>${t.title}</h3><p>${t.subtitle}</p></div>`;
-                });
-                html += '</div>';
-            }
-            
-            if (state.theorySelected) {
-                const t = state.theorySelected;
-                html += `<div class="back" onclick="goBack()">← Назад</div>
-                    <div class="t-section"><h3>${t.title}</h3>${t.content}</div>`;
-            }
-            
-            html += '</div></main></div>';
-            root.innerHTML = html;
-        }
-        
-
-        // ═══════════════════════════════════════════════════════════
-        // MOBILE SIDEBAR TOGGLE
-        // ═══════════════════════════════════════════════════════════
-        
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('active');
-        }
-        
-        function closeSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-        }
-        
-        // Initial render
-        render();
-    </script>
-</body>
-</html>
+                        <div class="g-check
