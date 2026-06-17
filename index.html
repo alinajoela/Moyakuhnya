@@ -247,6 +247,82 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
         .sidebar::-webkit-scrollbar-thumb:hover {
             background: rgba(196, 119, 59, 0.5);
         }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes slideInRight{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+        @keyframes scaleUp{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+        @keyframes heartPop{0%,100%{transform:scale(1)}30%{transform:scale(1.5)}60%{transform:scale(.88)}}
+        @keyframes toastSlide{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+        @keyframes checkPop{0%{transform:scale(0)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
+
+        .content{animation:fadeIn .24s ease both}
+        .detail-hero{animation:slideInRight .28s ease both}
+        .modal{animation:scaleUp .18s ease both}
+        .toast{animation:toastSlide .22s ease}
+        .g-check.on::after,.gl-check.on::after{animation:checkPop .22s ease}
+
+        /* Micro-interactions */
+        .btn{transition:all .15s;transform:scale(1)}
+        .btn:active{transform:scale(.95)!important}
+        .scale-btn:active{transform:scale(.88)!important;background:var(--accent)!important;color:#fff!important}
+        .fav-btn:active{animation:heartPop .3s ease}
+        .card{transition:transform .2s,box-shadow .2s}
+        .theory-card{transition:transform .2s,box-shadow .2s}
+        .nav-item{transition:background .12s,color .12s,border-color .12s}
+        .cat-card{transition:transform .2s,box-shadow .2s}
+
+        /* ── BOTTOM NAV (mobile only) ── */
+        .bottom-nav{
+            display:none;
+            position:fixed;bottom:0;left:0;right:0;
+            background:var(--ink);
+            border-top:1px solid rgba(255,255,255,.1);
+            z-index:150;
+            padding-bottom:env(safe-area-inset-bottom,0px);
+        }
+        .bottom-nav-inner{display:flex;height:54px}
+        .bn-item{
+            flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+            gap:3px;cursor:pointer;color:rgba(255,255,255,.38);font-size:9px;letter-spacing:.2px;
+            transition:color .15s;-webkit-tap-highlight-color:transparent;
+            user-select:none;padding:4px 2px;
+        }
+        .bn-item.active{color:var(--accent)}
+        .bn-item .bni{font-size:19px;line-height:1.2}
+
+        /* ── MOBILE LAYOUT IMPROVEMENTS ── */
+        @media(max-width:768px){
+            .bottom-nav{display:block}
+            .main{padding-bottom:62px}
+            /* horizontal-scroll planner */
+            .plan-grid{
+                display:flex!important;overflow-x:auto;
+                gap:8px;padding-bottom:8px;
+                -webkit-overflow-scrolling:touch;scrollbar-width:none;
+                grid-template-columns:unset!important;
+            }
+            .plan-grid::-webkit-scrollbar{display:none}
+            .day-col{min-width:108px;flex-shrink:0}
+            /* tighter detail layout */
+            .detail-hero{flex-direction:column;gap:10px}
+            .detail-hero .emoji{font-size:46px}
+            .groc-sum{margin-top:12px}
+        }
+        @media(max-width:480px){
+            .day-col{min-width:92px}
+            .header-left h2{font-size:15px}
+        }
+
+        /* ── KEYBOARD SHORTCUT BADGE ── */
+        .kbd-hint{
+            font-size:10px;color:var(--muted);margin-top:10px;
+            display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+        }
+        .kbd{
+            display:inline-block;background:var(--warm);border:1px solid var(--border);
+            border-radius:4px;padding:1px 5px;font-size:10px;font-family:monospace;color:var(--muted);
+        }
     </style>
 </head>
 <body>
@@ -1188,7 +1264,7 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
             
             // Search and portions controls
             if (!state.selected && !state.theorySelected && state.page !== 'planner') {
-                html += `<div class="search"><span>🔍</span><input type="text" placeholder="Поиск..." value="${state.search}" oninput="updateSearch(this.value)"/></div>`;
+                html += `<div class="search"><span>🔍</span><input type="text" placeholder="Поиск... (нажмите /)" value="${state.search}" oninput="updateSearch(this.value)" id="searchInput"/></div>`;
                 html += `<div class="portions-row"><span style="color:var(--muted)">👥</span>
                     <button class="scale-btn" style="width:22px;height:22px;font-size:13px" onclick="updatePortions(${state.portions} - 1)">−</button>
                     <strong>${state.portions}</strong>
@@ -1230,9 +1306,10 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
             if ((isCat || state.page === 'favorites') && !state.selected) {
                 if (filteredRecipes.length) {
                     html += '<div class="grid">';
-                    filteredRecipes.forEach(recipe => {
+                    filteredRecipes.forEach((recipe, ci) => {
                         const isFav = state.favorites.includes(recipe.id);
-                        html += `<div class="card" onclick="setSelected(RECIPES.find(r => r.id==='${recipe.id}'))">
+                        const delay = Math.min(ci * 38, 200);
+                        html += `<div class="card" style="animation:fadeIn .22s ${delay}ms ease both" onclick="setSelected(RECIPES.find(r => r.id==='${recipe.id}'))">
                             <div class="card-hero" style="position:relative">
                                 <span style="font-size:42px">${recipe.emoji}</span>
                                 <button class="fav-btn" onclick="event.stopPropagation(); toggleFavorite('${recipe.id}')">${isFav ? '❤️' : '🤍'}</button>
@@ -1260,7 +1337,14 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
             if (state.selected) {
                 const sel = state.selected;
                 const isFav = state.favorites.includes(sel.id);
-                html += `<div style="max-width:760px"><div class="back" onclick="goBack()">← Назад</div>
+                html += `<div style="max-width:760px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px">
+                    <div class="back" style="margin-bottom:0" onclick="goBack()">← Назад</div>
+                    <div class="kbd-hint" style="margin-top:0">
+                        <span><kbd class="kbd">Esc</kbd> назад</span>
+                        <span><kbd class="kbd">F</kbd> в избранное</span>
+                        <span><kbd class="kbd">+</kbd> <kbd class="kbd">−</kbd> порции</span>
+                    </div>
+                </div>
                     <div class="detail-hero">
                         <div class="emoji">${sel.emoji}</div>
                         <div>
@@ -1394,6 +1478,28 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
                     </div></div></div>`;
             }
 
+            // Bottom navigation (mobile)
+            const bnPages = ['poultry','beef','fish','soups','vegetarian','salads','snacks','breakfast','desserts','baking'];
+            const BN = [
+                {id:'home',   icon:'🏠', label:'Главная'},
+                {id:'poultry',icon:'🍽', label:'Рецепты'},
+                {id:'theory', icon:'📖', label:'Теория'},
+                {id:'planner',icon:'📅', label:'Планировщик'},
+                {id:'favorites',icon:'❤️',label:'Избранное'},
+            ];
+            html += '<nav class="bottom-nav"><div class="bottom-nav-inner">';
+            BN.forEach(item => {
+                const isActive = item.id === 'poultry'
+                    ? (bnPages.includes(state.page) || !!state.selected)
+                    : item.id === 'theory'
+                    ? (state.page === 'theory' || !!state.theorySelected)
+                    : (state.page === item.id && !state.selected && !state.theorySelected);
+                html += `<div class="bn-item${isActive ? ' active' : ''}" onclick="navigate('${item.id}')">
+                    <span class="bni">${item.icon}</span><span>${item.label}</span>
+                </div>`;
+            });
+            html += '</div></nav>';
+
             root.innerHTML = html;
         }
 
@@ -1447,6 +1553,47 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
             sidebar.classList.remove('open');
             overlay.classList.remove('active');
         }
+
+        // ═══════════════════════════════════════════════════════════
+        // KEYBOARD SHORTCUTS
+        // ═══════════════════════════════════════════════════════════
+
+        document.addEventListener('keydown', function(e) {
+            // Don't steal input from text fields
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                if (e.key === 'Escape') e.target.blur();
+                return;
+            }
+            switch(true) {
+                case e.key === 'Escape':
+                    if (state.planModal) closePlanModal();
+                    else if (state.selected || state.theorySelected) goBack();
+                    else closeSidebar();
+                    break;
+                // / or Ctrl/Cmd+K → focus search
+                case e.key === '/' || (e.key === 'k' && (e.metaKey || e.ctrlKey)):
+                    e.preventDefault();
+                    const inp = document.getElementById('searchInput');
+                    if (inp) inp.focus();
+                    break;
+                // Alt+← or Backspace → go back
+                case (e.key === 'Backspace' || e.key === 'ArrowLeft') && e.altKey:
+                    if (state.selected || state.theorySelected) { e.preventDefault(); goBack(); }
+                    break;
+                // f → toggle favourite on open recipe
+                case e.key === 'f' && !!state.selected:
+                    toggleFavorite(state.selected.id);
+                    break;
+                // + / = → more portions
+                case (e.key === '+' || e.key === '=') && !!state.selected:
+                    updatePortions(state.portions + 1);
+                    break;
+                // - → fewer portions
+                case e.key === '-' && !!state.selected:
+                    updatePortions(state.portions - 1);
+                    break;
+            }
+        });
 
         // Initial render
         render();
