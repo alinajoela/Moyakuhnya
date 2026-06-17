@@ -1173,8 +1173,15 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
             state.search = query;
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
+                const inp = document.getElementById('searchInput');
+                const pos = inp ? inp.selectionStart : null;
                 render();
-            }, 150);
+                const newInp = document.getElementById('searchInput');
+                if (newInp) {
+                    newInp.focus();
+                    if (pos !== null) newInp.setSelectionRange(pos, pos);
+                }
+            }, 80);
         }
         
         function toggleCheck(key) {
@@ -1276,6 +1283,7 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
             
             // HOME
             if (state.page === 'home' && !state.selected) {
+              if (!state.search) {
                 html += '<div class="grid2" style="margin-bottom:20px">';
                 Object.entries(CAT).forEach(([catId, cat]) => {
                     const count = RECIPES.filter(r => r.cat === catId).length;
@@ -1293,14 +1301,47 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
                     <div style="font-family:'Playfair Display',serif;font-size:16px;margin-bottom:3px">Недельный план</div>
                     <div style="font-size:11px;opacity:.8">Обед + ужин + список покупок</div>
                 </div></div>`;
+              } else {
+                // Global search results across all recipes
+                const q = state.search.toLowerCase();
+                const globalResults = RECIPES.filter(r =>
+                    r.title.toLowerCase().includes(q) ||
+                    r.desc.toLowerCase().includes(q)
+                );
+                if (globalResults.length) {
+                    html += `<p style="font-size:12px;color:var(--muted);margin-bottom:14px">Найдено: ${globalResults.length} рецептов</p><div class="grid">`;
+                    globalResults.forEach((recipe, ci) => {
+                        const isFav = state.favorites.includes(recipe.id);
+                        const delay = Math.min(ci * 38, 200);
+                        html += `<div class="card" style="animation:fadeIn .22s ${delay}ms ease both" onclick="setSelected(RECIPES.find(r => r.id==='${recipe.id}'))">
+                            <div class="card-hero" style="position:relative">
+                                <span style="font-size:42px">${recipe.emoji}</span>
+                                <button class="fav-btn" onclick="event.stopPropagation(); toggleFavorite('${recipe.id}')">${isFav ? '❤️' : '🤍'}</button>
+                            </div>
+                            <div class="card-body">
+                                <h3>${recipe.title}</h3>
+                                <p>${recipe.desc}</p>
+                                <div class="tags">
+                                    <span class="tag t-time">⏱ ${recipe.time}</span>
+                                    <span class="tag t-port">👥 ${recipe.portions}</span>
+                                    ${recipe.freezable ? '<span class="tag t-freeze">❄️ Заморозка</span>' : ''}
+                                </div>
+                            </div>
+                        </div>`;
+                    });
+                    html += '</div>';
+                } else {
+                    html += `<div class="empty"><div class="ei">🔍</div><h3>Ничего не найдено</h3><p>Попробуйте изменить запрос</p></div>`;
+                }
+              }
             }
-            
+
             // RECIPE LIST
             const isCat = CAT[state.page];
-            const filteredRecipes = isCat 
+            const filteredRecipes = isCat
                 ? RECIPES.filter(r => r.cat === state.page && (!state.search || r.title.toLowerCase().includes(state.search.toLowerCase())))
                 : state.page === 'favorites'
-                ? RECIPES.filter(r => state.favorites.includes(r.id))
+                ? RECIPES.filter(r => state.favorites.includes(r.id) && (!state.search || r.title.toLowerCase().includes(state.search.toLowerCase())))
                 : [];
             
             if ((isCat || state.page === 'favorites') && !state.selected) {
