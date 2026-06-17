@@ -295,24 +295,35 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
         @media(max-width:768px){
             .bottom-nav{display:block}
             .main{padding-bottom:62px}
-            /* horizontal-scroll planner */
+            /* planner: full-width day cards stacked vertically */
             .plan-grid{
-                display:flex!important;overflow-x:auto;
-                gap:8px;padding-bottom:8px;
-                -webkit-overflow-scrolling:touch;scrollbar-width:none;
+                display:flex!important;flex-direction:column;
+                gap:10px;overflow-x:unset;padding-bottom:0;
                 grid-template-columns:unset!important;
             }
-            .plan-grid::-webkit-scrollbar{display:none}
-            .day-col{min-width:108px;flex-shrink:0}
+            .day-col{min-width:unset;flex-shrink:unset;border-radius:var(--r)}
+            .day-head{border-radius:var(--r) var(--r) 0 0;text-align:left;padding:9px 12px;font-size:10px}
+            .day-slot{min-height:52px;padding:8px 12px}
+            .slot-val{font-size:12px}
             /* tighter detail layout */
             .detail-hero{flex-direction:column;gap:10px}
             .detail-hero .emoji{font-size:46px}
             .groc-sum{margin-top:12px}
         }
         @media(max-width:480px){
-            .day-col{min-width:92px}
             .header-left h2{font-size:15px}
         }
+
+        /* slot action buttons (edit / remove inside a filled plan slot) */
+        .slot-filled{display:flex;align-items:flex-start;justify-content:space-between;gap:4px}
+        .slot-name{flex:1;cursor:pointer;line-height:1.4}
+        .slot-name:hover{color:var(--accent)}
+        .slot-acts{display:flex;gap:2px;flex-shrink:0;margin-top:1px}
+        .slot-act{background:none;border:none;cursor:pointer;font-size:11px;padding:2px 4px;
+                  border-radius:4px;color:var(--muted);transition:background .12s,color .12s;line-height:1}
+        .slot-act:hover{background:var(--warm);color:var(--ink)}
+        .slot-act.remove:hover{background:#fee2e2;color:#dc2626}
+
 
         /* ── KEYBOARD SHORTCUT BADGE ── */
         .kbd-hint{
@@ -1380,10 +1391,14 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
                 const isFav = state.favorites.includes(sel.id);
                 html += `<div style="max-width:760px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px">
                     <div class="back" style="margin-bottom:0" onclick="goBack()">← Назад</div>
-                    <div class="kbd-hint" style="margin-top:0">
-                        <span><kbd class="kbd">Esc</kbd> назад</span>
-                        <span><kbd class="kbd">F</kbd> в избранное</span>
-                        <span><kbd class="kbd">+</kbd> <kbd class="kbd">−</kbd> порции</span>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <button onclick="toggleFavorite('${sel.id}')" style="display:flex;align-items:center;gap:6px;background:${isFav ? '#fee2e2' : 'var(--warm)'};border:none;border-radius:30px;padding:6px 14px;cursor:pointer;font-size:13px;font-family:'Inter',sans-serif;transition:all .15s">
+                            ${isFav ? '❤️ В избранном' : '🤍 В избранное'}
+                        </button>
+                        <div class="kbd-hint" style="margin-top:0;display:none" id="kbdHints">
+                            <span><kbd class="kbd">Esc</kbd> назад</span>
+                            <span><kbd class="kbd">+</kbd> <kbd class="kbd">−</kbd> порции</span>
+                        </div>
                     </div>
                 </div>
                     <div class="detail-hero">
@@ -1453,34 +1468,50 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
             // PLANNER
             if (state.page === 'planner') {
                 const DAYS = [
-                    {key:'mon',label:'Пн'},{key:'tue',label:'Вт'},{key:'wed',label:'Ср'},
-                    {key:'thu',label:'Чт'},{key:'fri',label:'Пт'},
-                    {key:'sat',label:'Сб'},{key:'sun',label:'Вс'}
+                    {key:'mon',label:'Понедельник'},{key:'tue',label:'Вторник'},{key:'wed',label:'Среда'},
+                    {key:'thu',label:'Четверг'},{key:'fri',label:'Пятница'},
+                    {key:'sat',label:'Суббота'},{key:'sun',label:'Воскресенье'}
                 ];
                 html += `<div class="plan-actions">
-                    <button class="btn btn-o btn-sm" onclick="clearPlan()">🗑 Очистить план</button>
+                    <button class="btn btn-p btn-sm" onclick="generatePlan()">✨ Сгенерировать план</button>
+                    <button class="btn btn-o btn-sm" onclick="clearPlan()">🗑 Очистить</button>
                 </div><div class="plan-grid">`;
+
                 DAYS.forEach(day => {
-                    const lunchId = state.plan[day.key + '-lunch'];
+                    const lunchId  = state.plan[day.key + '-lunch'];
                     const dinnerId = state.plan[day.key + '-dinner'];
-                    const lunchR = lunchId ? RECIPES.find(r => r.id === lunchId) : null;
+                    const lunchR  = lunchId  ? RECIPES.find(r => r.id === lunchId)  : null;
                     const dinnerR = dinnerId ? RECIPES.find(r => r.id === dinnerId) : null;
+
+                    const slotHtml = (mealKey, r) => r
+                        ? `<div class="slot-filled">
+                               <span class="slot-name" onclick="viewPlanRecipe('${r.id}')">${r.emoji} ${r.title}</span>
+                               <span class="slot-acts">
+                                   <button class="slot-act" title="Изменить" onclick="openPlanModal('${day.key}','${mealKey}')">✏️</button>
+                                   <button class="slot-act remove" title="Убрать" onclick="setPlanMeal('${day.key}','${mealKey}',null)">✕</button>
+                               </span>
+                           </div>`
+                        : `<span class="slot-empty" onclick="openPlanModal('${day.key}','${mealKey}')" style="cursor:pointer">+</span>`;
+
                     html += `<div class="day-col">
                         <div class="day-head">${day.label}</div>
-                        <div class="day-slot" onclick="openPlanModal('${day.key}','lunch')">
+                        <div class="day-slot${lunchR ? '' : ''}" onclick="${lunchR ? '' : `openPlanModal('${day.key}','lunch')`}" style="${lunchR ? '' : 'cursor:pointer'}">
                             <div class="slot-lbl">Обед</div>
-                            <div class="slot-val">${lunchR ? lunchR.emoji + ' ' + lunchR.title : '<span class="slot-empty">+</span>'}</div>
+                            <div class="slot-val">${slotHtml('lunch', lunchR)}</div>
                         </div>
-                        <div class="day-slot" onclick="openPlanModal('${day.key}','dinner')">
+                        <div class="day-slot" onclick="${dinnerR ? '' : `openPlanModal('${day.key}','dinner')`}" style="${dinnerR ? '' : 'cursor:pointer'}">
                             <div class="slot-lbl">Ужин</div>
-                            <div class="slot-val">${dinnerR ? dinnerR.emoji + ' ' + dinnerR.title : '<span class="slot-empty">+</span>'}</div>
+                            <div class="slot-val">${slotHtml('dinner', dinnerR)}</div>
                         </div>
                     </div>`;
                 });
+
                 html += '</div>';
+
                 const groceries = weeklyGroceries(state.plan);
                 if (Object.keys(groceries).length > 0) {
-                    html += `<div class="groc-sum"><h3>🛒 Список покупок на неделю</h3>`;
+                    html += `<div class="groc-sum" style="margin-top:18px"><h3>🛒 Список покупок на неделю</h3>
+                        <p style="font-size:11px;color:var(--muted);margin-bottom:10px">На основе выбранных рецептов</p>`;
                     Object.entries(groceries).forEach(([name, amounts]) => {
                         const gkey = 'groc-' + name;
                         const isChecked = state.checked[gkey];
@@ -1491,7 +1522,8 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
                     });
                     html += '</div>';
                 } else {
-                    html += `<div class="empty"><div class="ei">📅</div><h3>План пуст</h3><p>Нажмите на ячейку чтобы добавить блюдо</p></div>`;
+                    html += `<div class="empty"><div class="ei">📅</div><h3>План пуст</h3>
+                        <p>Нажмите <strong>✨ Сгенерировать план</strong> или добавьте блюда вручную</p></div>`;
                 }
             }
 
@@ -1574,6 +1606,30 @@ body{background:var(--cream);font-family:'Inter',sans-serif;color:var(--ink);fon
             state.plan = {};
             saveState();
             render();
+        }
+
+        function generatePlan() {
+            const pool = RECIPES.filter(r =>
+                ['poultry','beef','fish','vegetarian','soups','salads'].includes(r.cat)
+            );
+            const shuffled = [...pool].sort(() => Math.random() - 0.5);
+            const DAYS = ['mon','tue','wed','thu','fri','sat','sun'];
+            const MEALS = ['lunch','dinner'];
+            let idx = 0;
+            const newPlan = {};
+            DAYS.forEach(day => {
+                MEALS.forEach(meal => {
+                    if (idx < shuffled.length) newPlan[day + '-' + meal] = shuffled[idx++].id;
+                });
+            });
+            state.plan = newPlan;
+            saveState();
+            render();
+        }
+
+        function viewPlanRecipe(recipeId) {
+            const recipe = RECIPES.find(r => r.id === recipeId);
+            if (recipe) setSelected(recipe);
         }
 
 
